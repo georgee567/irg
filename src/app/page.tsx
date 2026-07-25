@@ -1,11 +1,13 @@
-import Header from "@/components/layout/Header";
+import AnnouncementBar from "@/components/layout/AnnouncementBar";
+import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <>
-      <Header />
+    <main className="bg-black text-white">
+      <AnnouncementBar />
+      <Navbar />
       <Hero />
-    </>
+    </main>
   );
 }
