@@ -1,83 +1,87 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 const collections = [
   {
     title: "Men",
-    subtitle: "Luxury Streetwear",
     image: "/images/hero-model.png",
+    href: "/shop?category=men",
   },
   {
     title: "Women",
-    subtitle: "Premium Fashion",
     image: "/images/hero-model.png",
+    href: "/shop?category=women",
   },
   {
     title: "Accessories",
-    subtitle: "Complete Your Style",
     image: "/images/hero-model.png",
+    href: "/shop?category=accessories",
   },
 ];
 
 export default function Collections() {
   return (
-    <section className="bg-black py-32">
+    <section className="bg-black py-28">
 
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="mb-16 text-center">
+        <div className="mb-16 flex items-end justify-between">
 
-          <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            Collections
-          </p>
+          <div>
 
-          <h2 className="mt-5 font-serif text-6xl text-white">
-            Discover IRG
-          </h2>
+            <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
+              Collections
+            </p>
+
+            <h2 className="mt-4 font-serif text-5xl text-white">
+              Explore Categories
+            </h2>
+
+          </div>
+
+          <Link
+            href="/shop"
+            className="hidden md:block border border-[#D4AF37] px-6 py-3 uppercase tracking-[0.25em] text-xs text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
+          >
+            View All
+          </Link>
 
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
 
-          {collections.map((collection) => (
+          {collections.map((item) => (
 
-            <div
-              key={collection.title}
-              className="group relative h-[600px] overflow-hidden rounded-[35px]"
+            <Link
+              key={item.title}
+              href={item.href}
+              className="group relative h-[560px] overflow-hidden rounded-3xl"
             >
 
               <Image
-                src={collection.image}
-                alt={collection.title}
+                src={item.image}
+                alt={item.title}
                 fill
                 className="object-cover transition duration-700 group-hover:scale-110"
               />
 
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
-              <div className="absolute bottom-0 left-0 p-10">
+              <div className="absolute bottom-10 left-10">
 
-                <p className="text-sm uppercase tracking-[0.35em] text-[#D4AF37]">
-                  {collection.subtitle}
-                </p>
-
-                <h3 className="mt-4 font-serif text-5xl text-white">
-                  {collection.title}
+                <h3 className="font-serif text-4xl text-white">
+                  {item.title}
                 </h3>
 
-                <Link
-                  href="/shop"
-                  className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#D4AF37] px-7 py-3 text-sm uppercase tracking-[0.2em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
-                >
-                  Shop Collection
-
-                  <ArrowRight size={17} />
-                </Link>
+                <span className="mt-4 inline-block border border-[#D4AF37] px-5 py-3 text-xs uppercase tracking-[0.3em] text-[#D4AF37] transition group-hover:bg-[#D4AF37] group-hover:text-black">
+                  Shop Now
+                </span>
 
               </div>
 
-            </div>
+            </Link>
 
           ))}
 

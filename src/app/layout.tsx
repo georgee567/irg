@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Inter, Cormorant_Garamond } from "next/font/google";
-
 import "./globals.css";
 
 import { CartProvider } from "@/context/CartContext";
@@ -8,41 +6,54 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SearchProvider } from "@/context/SearchContext";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-heading",
-});
+import PageLoader from "@/components/ui/PageLoader";
+import CustomCursor from "@/components/ui/CustomCursor";
+import BackToTop from "@/components/ui/BackToTop";
+import PageTransition from "@/components/ui/PageTransition";
 
 export const metadata: Metadata = {
-  title: "IRG | Luxury Streetwear",
-  description: "Luxury fashion built for the next generation.",
+  title: "IRG | Luxury Fashion",
+  description: "Luxury Fashion & Streetwear by IRG",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} ${cormorant.variable} bg-black text-white`}
-      >
+      <body className="bg-black text-white">
+
         <AuthProvider>
+
           <SearchProvider>
-            <CartProvider>
-              <WishlistProvider>
-                {children}
-              </WishlistProvider>
-            </CartProvider>
+
+            <WishlistProvider>
+
+              <CartProvider>
+
+                {/* <PageLoader /> */}
+
+{/* <CustomCursor /> */}
+
+{/* <BackToTop /> */}
+
+{/* 
+<PageTransition>
+  {children}
+</PageTransition>
+*/}
+
+{children}
+              </CartProvider>
+
+            </WishlistProvider>
+
           </SearchProvider>
+
         </AuthProvider>
+
       </body>
     </html>
   );

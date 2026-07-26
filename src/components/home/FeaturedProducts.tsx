@@ -1,32 +1,36 @@
-import Image from "next/image";
-import { Heart } from "lucide-react";
+"use client";
 
-const products = [
-  { name: "IRG Oversized Tee", category: "T-Shirts", price: "KSh 3,499", badge: "NEW" },
-  { name: "IRG Signature Jacket", category: "Outerwear", price: "KSh 8,999", badge: "BESTSELLER" },
-  { name: "IRG Cargo Pants", category: "Bottoms", price: "KSh 5,999", badge: "LIMITED" },
-  { name: "IRG Leather Sneakers", category: "Footwear", price: "KSh 9,999", badge: "HOT" },
-  { name: "IRG Women's Dress", category: "Women", price: "KSh 7,499", badge: "NEW" },
-  { name: "IRG Crossbody Bag", category: "Accessories", price: "KSh 4,999", badge: "TRENDING" },
-  { name: "IRG Denim Jeans", category: "Denim", price: "KSh 6,499", badge: "NEW" },
-  { name: "IRG Luxury Cap", category: "Accessories", price: "KSh 2,999", badge: "HOT" },
-];
+import Image from "next/image";
+import Link from "next/link";
+
+import { useCart } from "@/context/CartContext";
+import { products } from "@/data/products";
 
 export default function FeaturedProducts() {
-  return (
-    <section className="bg-[#050505] py-32">
+  const { addToCart } = useCart();
 
+  return (
+    <section className="bg-[#050505] py-28">
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="mb-16 text-center">
+        <div className="mb-16 flex items-end justify-between">
 
-          <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            FEATURED PRODUCTS
-          </p>
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
+              Featured
+            </p>
 
-          <h2 className="mt-5 font-serif text-6xl text-white">
-            Shop The Collection
-          </h2>
+            <h2 className="mt-4 font-serif text-5xl text-white">
+              IRG Signature Collection
+            </h2>
+          </div>
+
+          <Link
+            href="/shop"
+            className="border border-[#D4AF37] px-6 py-3 text-xs uppercase tracking-[0.3em] text-[#D4AF37]"
+          >
+            View All
+          </Link>
 
         </div>
 
@@ -34,58 +38,59 @@ export default function FeaturedProducts() {
 
           {products.map((product) => (
 
-            <div
-              key={product.name}
-              className="group overflow-hidden rounded-[30px] border border-[#1d1d1d] bg-black"
+            <Link
+              key={product.id}
+              href={`/product/${product.id}`}
+              className="group overflow-hidden rounded-3xl border border-[#222] bg-black"
             >
 
-              <div className="relative h-[380px] overflow-hidden">
+              <div className="relative h-[360px]">
 
                 <Image
-                  src="/images/hero-model.png"
+                  src={product.image}
                   alt={product.name}
                   fill
                   className="object-cover transition duration-700 group-hover:scale-110"
                 />
 
-                <span className="absolute left-5 top-5 rounded-full bg-[#D4AF37] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
-                  {product.badge}
-                </span>
-
-                <button className="absolute right-5 top-5 rounded-full bg-black/60 p-3 backdrop-blur-md">
-                  <Heart size={18} />
-                </button>
-
               </div>
 
-              <div className="p-7">
+              <div className="p-6">
 
-                <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37]">
-                  {product.category}
-                </p>
-
-                <h3 className="mt-3 font-serif text-2xl text-white">
+                <h3 className="font-serif text-2xl text-white">
                   {product.name}
                 </h3>
 
-                <p className="mt-5 text-xl font-semibold text-white">
-                  {product.price}
+                <p className="mt-4 text-[#D4AF37]">
+                  KSh {product.price.toLocaleString()}
                 </p>
 
-                <button className="mt-7 w-full rounded-full border border-[#D4AF37] py-3 text-sm uppercase tracking-[0.25em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+
+                    addToCart({
+                      id: product.id,
+                      name: product.name,
+                      image: product.image,
+                      price: product.price,
+                      quantity: 1,
+                    });
+                  }}
+                  className="mt-6 w-full rounded-md border border-[#D4AF37] py-3 uppercase tracking-[0.25em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
+                >
                   Add To Cart
                 </button>
 
               </div>
 
-            </div>
+            </Link>
 
           ))}
 
         </div>
 
       </div>
-
     </section>
   );
 }

@@ -1,80 +1,54 @@
-import { Star } from "lucide-react";
+"use client";
 
-const testimonials = [
+const reviews = [
   {
-    name: "Brian Mwangi",
-    role: "Nairobi",
-    review:
-      "IRG completely changed how I dress. The quality is premium and every piece feels luxurious.",
+    name: "Brian M.",
+    text: "Best luxury streetwear brand I've worn.",
   },
   {
-    name: "Faith Wanjiku",
-    role: "Mombasa",
-    review:
-      "Beautiful craftsmanship, elegant designs and excellent customer service. Worth every shilling.",
+    name: "Michelle A.",
+    text: "Premium quality and amazing customer service.",
   },
   {
-    name: "Kevin Otieno",
-    role: "Kisumu",
-    review:
-      "The attention to detail is incredible. IRG feels like an international luxury brand.",
+    name: "Kevin O.",
+    text: "Every piece feels exclusive.",
   },
 ];
 
 export default function Testimonials() {
   return (
-    <section className="bg-[#050505] py-32">
+    <section className="bg-[#050505] py-28">
 
-      <div className="mx-auto max-w-7xl px-8">
+      <div className="mx-auto max-w-6xl px-8">
 
-        <div className="text-center">
+        <div className="mb-16 text-center">
 
           <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
             Testimonials
           </p>
 
-          <h2 className="mt-5 font-serif text-6xl text-white">
-            Loved Worldwide
+          <h2 className="mt-4 font-serif text-5xl text-white">
+            Loved By Our Community
           </h2>
 
         </div>
 
-        <div className="mt-20 grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-8 lg:grid-cols-3">
 
-          {testimonials.map((item) => (
+          {reviews.map((review) => (
 
             <div
-              key={item.name}
-              className="rounded-[30px] border border-[#1d1d1d] bg-black p-10 transition duration-300 hover:border-[#D4AF37]"
+              key={review.name}
+              className="rounded-3xl border border-[#222] bg-black p-10"
             >
 
-              <div className="mb-8 flex gap-1">
-
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    size={18}
-                    className="fill-[#D4AF37] text-[#D4AF37]"
-                  />
-                ))}
-
-              </div>
-
-              <p className="leading-9 text-gray-300">
-                "{item.review}"
+              <p className="text-lg leading-8 italic text-gray-300">
+                "{review.text}"
               </p>
 
-              <div className="mt-10">
-
-                <h3 className="font-serif text-2xl text-white">
-                  {item.name}
-                </h3>
-
-                <p className="mt-2 text-sm uppercase tracking-[0.3em] text-[#D4AF37]">
-                  {item.role}
-                </p>
-
-              </div>
+              <h3 className="mt-8 font-semibold text-[#D4AF37]">
+                {review.name}
+              </h3>
 
             </div>
 

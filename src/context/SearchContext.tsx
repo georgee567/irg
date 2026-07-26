@@ -12,9 +12,8 @@ interface SearchContextType {
   setSearch: (value: string) => void;
 }
 
-const SearchContext = createContext<SearchContextType | undefined>(
-  undefined
-);
+const SearchContext =
+  createContext<SearchContextType | null>(null);
 
 export function SearchProvider({
   children,
@@ -38,11 +37,8 @@ export function SearchProvider({
 export function useSearch() {
   const context = useContext(SearchContext);
 
-  if (!context) {
-    throw new Error(
-      "useSearch must be used inside SearchProvider"
-    );
-  }
+  if (!context)
+    throw new Error("SearchProvider missing");
 
   return context;
 }

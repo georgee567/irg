@@ -1,111 +1,74 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-black">
+    <section className="relative h-screen overflow-hidden bg-black">
+
+      {/* Background */}
 
       <Image
         src="/images/hero-model.png"
-        alt="IRG"
+        alt="IRG Hero"
         fill
         priority
         className="object-cover object-center"
       />
 
-      <div className="absolute inset-0 bg-black/60" />
+      {/* Overlay */}
 
-      <div className="absolute right-0 top-1/2 h-[700px] w-[700px] -translate-y-1/2 rounded-full bg-[#D4AF37]/10 blur-[170px]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/55 to-black/25" />
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center justify-between px-8">
+      {/* Gold Glow */}
+
+      <div className="absolute right-0 top-1/2 h-[750px] w-[750px] -translate-y-1/2 rounded-full bg-[#D4AF37]/10 blur-[170px]" />
+
+      {/* Hero */}
+
+      <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center px-8">
 
         <div className="max-w-2xl">
 
-          <p className="text-xs uppercase tracking-[0.45em] text-[#D4AF37]">
-            NEW COLLECTION 2026
-          </p>
+          <div className="mb-8 inline-flex rounded-full border border-[#D4AF37]/30 bg-black/40 px-6 py-3 backdrop-blur-xl">
 
-          <h1 className="mt-8 font-serif text-7xl leading-[0.9] text-white md:text-8xl">
+            <span className="text-[11px] uppercase tracking-[0.45em] text-[#D4AF37]">
+              Luxury Streetwear • Est. 2026
+            </span>
+
+          </div>
+
+          <h1 className="font-serif text-5xl font-semibold leading-[0.9] text-white md:text-7xl xl:text-8xl">
+
             Wear
             <br />
-            Your
-            <br />
-            Identity
+            Your Identity
+
           </h1>
 
-          <p className="mt-8 max-w-xl text-lg leading-9 text-gray-300">
-            Luxury streetwear inspired by confidence,
-            individuality and timeless design.
+          <p className="mt-8 max-w-xl text-lg leading-8 text-gray-300">
+
+            Premium luxury streetwear crafted for creators,
+            visionaries and trendsetters.
+
           </p>
 
-          <div className="mt-12 flex gap-5">
+          <div className="mt-12 flex flex-wrap items-center gap-6">
 
-            <button className="rounded-full bg-[#D4AF37] px-10 py-4 font-semibold text-black transition hover:scale-105">
+            <Link
+              href="/shop"
+              className="rounded-md bg-[#D4AF37] px-9 py-4 font-semibold text-black transition duration-300 hover:scale-105"
+            >
               Shop Now
-            </button>
+            </Link>
 
-            <button className="rounded-full border border-white/30 px-10 py-4 text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]">
+            <Link
+              href="/about"
+              className="rounded-md border border-white/30 bg-white/10 px-9 py-4 font-semibold text-white backdrop-blur-md transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+            >
               Explore Luxury
-            </button>
-
-          </div>
-
-          <div className="mt-20 flex gap-16">
-
-            <div>
-              <h2 className="font-serif text-4xl text-[#D4AF37]">
-                120+
-              </h2>
-              <p className="mt-2 text-gray-400">
-                Products
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-serif text-4xl text-[#D4AF37]">
-                15K+
-              </h2>
-              <p className="mt-2 text-gray-400">
-                Customers
-              </p>
-            </div>
-
-            <div>
-              <h2 className="font-serif text-4xl text-[#D4AF37]">
-                Global
-              </h2>
-              <p className="mt-2 text-gray-400">
-                Shipping
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="hidden lg:block">
-
-          <div className="w-[330px] rounded-[35px] border border-[#2b2b2b] bg-black/40 p-8 backdrop-blur-xl">
-
-            <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-              IRG SIGNATURE
-            </p>
-
-            <h3 className="mt-5 font-serif text-3xl text-white">
-              Premium
-              <br />
-              Street Luxury
-            </h3>
-
-            <p className="mt-6 leading-8 text-gray-400">
-              Discover timeless fashion built with premium fabrics,
-              modern silhouettes and luxury craftsmanship.
-            </p>
-
-            <button className="mt-8 w-full rounded-full bg-[#D4AF37] py-4 font-semibold text-black transition hover:scale-105">
-              View Collection
-            </button>
+            </Link>
 
           </div>
 
@@ -113,7 +76,71 @@ export default function Hero() {
 
       </div>
 
-      <div className="absolute bottom-0 left-0 h-44 w-full bg-gradient-to-t from-black to-transparent" />
+      {/* Floating Cards */}
+
+      <div className="absolute bottom-24 right-10 z-30 hidden xl:flex flex-col gap-6">
+
+        <div className="w-64 rounded-3xl border border-[#D4AF37]/20 bg-black/45 p-6 backdrop-blur-xl">
+
+          <p className="text-[11px] uppercase tracking-[0.3em] text-[#D4AF37]">
+            New Collection
+          </p>
+
+          <h3 className="mt-3 font-serif text-3xl text-white">
+            Summer 2026
+          </h3>
+
+          <p className="mt-3 text-sm leading-7 text-gray-400">
+            Discover timeless luxury inspired by modern street culture.
+          </p>
+
+        </div>
+
+        <div className="rounded-3xl border border-[#222] bg-black/45 p-6 backdrop-blur-xl">
+
+          <div className="grid grid-cols-2 gap-8">
+
+            <div>
+
+              <h2 className="text-3xl font-bold text-[#D4AF37]">
+                50+
+              </h2>
+
+              <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
+                Products
+              </p>
+
+            </div>
+
+            <div>
+
+              <h2 className="text-3xl font-bold text-[#D4AF37]">
+                20K+
+              </h2>
+
+              <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
+                Customers
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Scroll */}
+
+      <div className="absolute bottom-14 left-1/2 z-30 -translate-x-1/2">
+
+        <div className="h-14 w-px bg-[#D4AF37]" />
+
+      </div>
+
+      {/* Bottom Fade */}
+
+      <div className="absolute bottom-0 left-0 h-48 w-full bg-gradient-to-t from-black to-transparent" />
 
     </section>
   );

@@ -1,85 +1,71 @@
-import {
-  ShieldCheck,
-  Truck,
-  Sparkles,
-  Gem,
-} from "lucide-react";
+"use client";
 
-const features = [
+import { ShieldCheck, Truck, Sparkles, Award } from "lucide-react";
+
+const items = [
   {
     icon: ShieldCheck,
     title: "Premium Quality",
-    text: "Crafted using carefully selected premium materials for exceptional durability.",
+    text: "Luxury fabrics with premium finishing.",
   },
   {
     icon: Truck,
     title: "Worldwide Shipping",
-    text: "Fast and secure delivery to customers across the globe.",
+    text: "Fast global delivery.",
   },
   {
     icon: Sparkles,
-    title: "Luxury Design",
-    text: "Minimalist fashion inspired by modern luxury and timeless elegance.",
+    title: "Exclusive Designs",
+    text: "Limited edition collections.",
   },
   {
-    icon: Gem,
-    title: "Exclusive Drops",
-    text: "Limited edition collections available only to the IRG community.",
+    icon: Award,
+    title: "Luxury Standard",
+    text: "Designed for timeless elegance.",
   },
 ];
 
 export default function WhyChoose() {
   return (
-    <section className="bg-black py-32">
+    <section className="bg-black py-28">
 
       <div className="mx-auto max-w-7xl px-8">
 
-        <div className="text-center">
+        <div className="mb-16 text-center">
 
           <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            WHY IRG
+            Why IRG
           </p>
 
-          <h2 className="mt-5 font-serif text-6xl text-white">
-            Designed To Stand Out
+          <h2 className="mt-4 font-serif text-5xl text-white">
+            Crafted For Excellence
           </h2>
 
         </div>
 
-        <div className="mt-20 grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
 
-          {features.map((feature) => {
+          {items.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-3xl border border-[#222] bg-[#090909] p-10"
+            >
 
-            const Icon = feature.icon;
+              <item.icon
+                size={42}
+                className="text-[#D4AF37]"
+              />
 
-            return (
+              <h3 className="mt-8 font-serif text-2xl text-white">
+                {item.title}
+              </h3>
 
-              <div
-                key={feature.title}
-                className="rounded-[28px] border border-[#1d1d1d] bg-[#090909] p-10 transition duration-300 hover:-translate-y-2 hover:border-[#D4AF37]"
-              >
+              <p className="mt-4 leading-7 text-gray-400">
+                {item.text}
+              </p>
 
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#D4AF37]/10">
-
-                  <Icon
-                    size={28}
-                    className="text-[#D4AF37]"
-                  />
-
-                </div>
-
-                <h3 className="mt-8 font-serif text-3xl text-white">
-                  {feature.title}
-                </h3>
-
-                <p className="mt-5 leading-8 text-gray-400">
-                  {feature.text}
-                </p>
-
-              </div>
-
-            );
-          })}
+            </div>
+          ))}
 
         </div>
 

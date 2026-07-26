@@ -68,7 +68,13 @@ export function CartProvider({
         );
       }
 
-      return [...prev, item];
+      return [
+  ...prev,
+  {
+    ...item,
+    quantity: item.quantity || 1,
+  },
+];
     });
   };
 
