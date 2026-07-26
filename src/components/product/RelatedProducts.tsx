@@ -1,29 +1,39 @@
-import Link from "next/link";
-import Image from "next/image";
+"use client";
 
-const products = Array.from({ length: 4 }).map((_, i) => ({
-  id: i + 20,
-  name: `IRG Collection ${i + 1}`,
-  price: 3999 + i * 1200,
-  image: "/images/hero-model.png",
-}));
+import Image from "next/image";
+import Link from "next/link";
+
+import { products } from "@/data/products";
 
 export default function RelatedProducts() {
+
   return (
+
     <section className="mt-32">
 
-      <h2 className="mb-12 font-serif text-5xl">
-        Related Products
-      </h2>
+      <div className="mb-12 flex items-center justify-between">
+
+        <h2 className="font-serif text-5xl">
+          You May Also Like
+        </h2>
+
+        <Link
+          href="/shop"
+          className="text-[#D4AF37]"
+        >
+          View All →
+        </Link>
+
+      </div>
 
       <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
 
-        {products.map((product) => (
+        {products.slice(0,4).map((product)=>(
 
           <Link
-            key={product.id}
             href={`/product/${product.id}`}
-            className="overflow-hidden rounded-3xl border border-[#222] bg-[#090909]"
+            key={product.id}
+            className="overflow-hidden rounded-3xl border border-[#222]"
           >
 
             <div className="relative h-80">
@@ -43,7 +53,7 @@ export default function RelatedProducts() {
                 {product.name}
               </h3>
 
-              <p className="mt-4 text-[#D4AF37]">
+              <p className="mt-3 text-[#D4AF37]">
                 KSh {product.price.toLocaleString()}
               </p>
 
@@ -56,5 +66,7 @@ export default function RelatedProducts() {
       </div>
 
     </section>
+
   );
+
 }

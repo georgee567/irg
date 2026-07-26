@@ -1,83 +1,163 @@
 "use client";
 
 import { useState } from "react";
+import { Heart } from "lucide-react";
 
-export default function ProductInfo() {
+import { Product } from "@/data/products";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+
+interface Props {
+  product: Product;
+}
+
+const sizes = ["XS", "S", "M", "L", "XL"];
+
+const colours = [
+  "Black",
+  "White",
+  "Grey",
+  "Brown",
+];
+
+export default function ProductInfo({
+  product,
+}: Props) {
+
+  const { addToCart } = useCart();
+ const { addToWishlist } = useWishlist();
+
   const [size, setSize] = useState("M");
-  const [qty, setQty] = useState(1);
+  const [colour, setColour] = useState("Black");
+  const [quantity, setQuantity] = useState(1);
 
   return (
+
     <div>
 
-      <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-        IRG Collection
+      <p className="uppercase tracking-[0.35em] text-[#D4AF37]">
+        {product.category}
       </p>
 
-      <h1 className="mt-4 font-serif text-6xl">
-        IRG Signature Tee
+      <h1 className="mt-5 font-serif text-6xl">
+        {product.name}
       </h1>
 
-      <p className="mt-6 text-3xl font-bold text-[#D4AF37]">
-        KSh 3,999
+      <p className="mt-6 text-3xl text-[#D4AF37]">
+        KSh {product.price.toLocaleString()}
       </p>
 
       <p className="mt-8 leading-8 text-gray-400">
-        Premium heavyweight cotton with oversized luxury fit,
-        crafted for everyday confidence.
+        {product.description}
       </p>
 
       <div className="mt-10">
 
-        <h3 className="mb-4 text-sm uppercase tracking-[0.3em]">
+        <h3 className="mb-4 font-semibold">
           Size
         </h3>
 
         <div className="flex gap-3">
 
-          {["S", "M", "L", "XL"].map((item) => (
+          {sizes.map((item)=>(
+
             <button
-              key={item}
-              onClick={() => setSize(item)}
-              className={`h-12 w-12 rounded-xl border ${
-                size === item
-                  ? "border-[#D4AF37] bg-[#D4AF37] text-black"
-                  : "border-[#222]"
-              }`}
-            >
-              {item}
-            </button>
+  onClick={() =>
+    addToWishlist({
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+    })
+  }
+  className="mt-5 flex items-center gap-3 text-gray-300 transition hover:text-[#D4AF37]"
+>
+
+  <Heart size={20} />
+
+  Add To Wishlist
+
+</button>
+
           ))}
 
         </div>
 
       </div>
 
-      <div className="mt-10 flex items-center gap-5">
+      <div className="mt-10">
+
+        <h3 className="mb-4 font-semibold">
+          Colour
+        </h3>
+
+        <div className="flex gap-3">
+
+          {colours.map((item)=>(
+
+            <button
+              key={item}
+              onClick={()=>setColour(item)}
+              className={`rounded-lg border px-5 py-3 transition ${
+                colour===item
+                  ? "border-[#D4AF37] bg-[#D4AF37] text-black"
+                  : "border-[#333]"
+              }`}
+            >
+              {item}
+            </button>
+
+          ))}
+
+        </div>
+
+      </div>
+
+      <div className="mt-10 flex items-center gap-4">
 
         <button
-          onClick={() => qty > 1 && setQty(qty - 1)}
-          className="h-12 w-12 rounded-xl border border-[#222]"
+          onClick={()=>quantity>1&&setQuantity(quantity-1)}
+          className="h-12 w-12 rounded-lg border border-[#333]"
         >
           -
         </button>
 
-        <span className="text-2xl">
-          {qty}
+        <span className="text-xl">
+          {quantity}
         </span>
 
         <button
-          onClick={() => setQty(qty + 1)}
-          className="h-12 w-12 rounded-xl border border-[#222]"
+          onClick={()=>setQuantity(quantity+1)}
+          className="h-12 w-12 rounded-lg border border-[#333]"
         >
           +
         </button>
 
       </div>
 
-      <button className="mt-10 w-full rounded-xl bg-[#D4AF37] py-4 font-semibold text-black">
+      <button
+        onClick={()=>addToCart({
+          id:product.id,
+          name:`${product.name} (${size}, ${colour})`,
+          image:product.image,
+          price:product.price,
+          quantity,
+        })}
+        className="mt-10 w-full rounded-xl bg-[#D4AF37] py-5 font-bold text-black"
+      >
         Add To Cart
       </button>
 
+      <button className="mt-5 flex items-center gap-3 text-gray-300 hover:text-[#D4AF37]">
+
+        <Heart size={20}/>
+
+        Add To Wishlist
+
+      </button>
+
     </div>
+
   );
+
 }

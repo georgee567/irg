@@ -16,6 +16,7 @@ interface Props {
 export default async function ProductPage({
   params,
 }: Props) {
+
   const { id } = await params;
 
   const product = products.find(
@@ -23,19 +24,22 @@ export default async function ProductPage({
   );
 
   if (!product) {
+
     notFound();
+
   }
 
   return (
+
     <main className="min-h-screen bg-black text-white">
 
       <div className="mx-auto max-w-7xl px-8 py-24">
 
         <div className="grid gap-20 lg:grid-cols-2">
 
-          <ProductGallery />
+          <ProductGallery product={product} />
 
-          <ProductInfo />
+          <ProductInfo product={product} />
 
         </div>
 
@@ -46,5 +50,7 @@ export default async function ProductPage({
       </div>
 
     </main>
+
   );
+
 }
