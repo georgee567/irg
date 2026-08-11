@@ -13,6 +13,8 @@ export interface WishlistItem {
   name: string;
   image: string;
   price: number;
+  slug?: string;
+  category?: string;
 }
 
 interface WishlistContextType {
@@ -28,14 +30,15 @@ export function WishlistProvider({
 }: {
   children: ReactNode;
 }) {
-
   const [wishlist, setWishlist] =
     useState<WishlistItem[]>([]);
 
   useEffect(() => {
+    // Load wishlist data from localStorage after hydration
+    // to prevent server/client mismatch
     const saved = localStorage.getItem("irg-wishlist");
-
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWishlist(JSON.parse(saved));
     }
   }, []);

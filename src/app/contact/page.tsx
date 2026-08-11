@@ -15,7 +15,9 @@ export default function ContactPage() {
         <p className="mt-8 text-lg leading-8 text-gray-400">
           Email: info@irg.com
           <br />
-          Phone: +254 XXX XXX XXX
+          Phone: +254 107117425
+          <br />
+          Phone: +254 739926782
           <br />
           Nairobi, Kenya
         </p>

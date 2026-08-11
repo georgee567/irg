@@ -37,9 +37,11 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+    // Load user data from localStorage after hydration
+    // to prevent server/client mismatch
     const saved = localStorage.getItem("irg-user");
-
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(saved));
     }
   }, []);

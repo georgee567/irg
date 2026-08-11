@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 
 import { CartProvider } from "@/context/CartContext";
@@ -6,10 +7,20 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SearchProvider } from "@/context/SearchContext";
 
-import PageLoader from "@/components/ui/PageLoader";
-import CustomCursor from "@/components/ui/CustomCursor";
-import BackToTop from "@/components/ui/BackToTop";
-import PageTransition from "@/components/ui/PageTransition";
+import PublicLayout from "@/components/layout/PublicLayout";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const heading = Bodoni_Moda({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "IRG | Luxury Fashion",
@@ -23,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="bg-black text-white">
+      <body className={`${inter.variable} ${heading.variable} bg-black text-white`}>
 
         <AuthProvider>
 
@@ -33,19 +44,7 @@ export default function RootLayout({
 
               <CartProvider>
 
-                {/* <PageLoader /> */}
-
-{/* <CustomCursor /> */}
-
-{/* <BackToTop /> */}
-
-{/* 
-<PageTransition>
-  {children}
-</PageTransition>
-*/}
-
-{children}
+                <PublicLayout>{children}</PublicLayout>
               </CartProvider>
 
             </WishlistProvider>

@@ -24,7 +24,7 @@ export default function ShopPage() {
 
   const [sort, setSort] = useState("default");
 
-  let filtered = products.filter((product) => {
+  const filtered = products.filter((product) => {
 
     const matchesSearch =
       product.name

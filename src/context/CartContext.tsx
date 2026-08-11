@@ -14,6 +14,10 @@ export interface CartItem {
   image: string;
   price: number;
   quantity: number;
+  selectedSize?: string;
+  selectedColor?: string;
+  slug?: string;
+  category?: string;
 }
 
 interface CartContextType {
@@ -37,9 +41,11 @@ export function CartProvider({
   const [cart, setCart] = useState<CartItem[]>([]);
 
   useEffect(() => {
+    // Load cart data from localStorage after hydration
+    // to prevent server/client mismatch
     const saved = localStorage.getItem("irg-cart");
-
     if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCart(JSON.parse(saved));
     }
   }, []);

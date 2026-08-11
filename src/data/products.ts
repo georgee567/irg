@@ -15,9 +15,8 @@ export const products: Product[] = [
     slug: "irg-signature-hoodie",
     category: "Hoodies",
     price: 5999,
-    image: "/images/products/hoodie1.jpg",
-    description:
-      "Premium heavyweight luxury hoodie crafted for everyday elegance.",
+    image: "/images/products/jacket-01.jpg",
+    description: "Premium heavyweight luxury hoodie crafted for everyday elegance.",
   },
   {
     id: 2,
@@ -25,9 +24,8 @@ export const products: Product[] = [
     slug: "irg-oversized-tee",
     category: "T-Shirts",
     price: 3499,
-    image: "/images/products/shirt1.jpg",
-    description:
-      "Minimal oversized t-shirt with premium cotton construction.",
+    image: "/images/products/tshirt-01.jpg",
+    description: "Minimal oversized t-shirt with premium cotton construction.",
   },
   {
     id: 3,
@@ -35,9 +33,8 @@ export const products: Product[] = [
     slug: "irg-cargo-pants",
     category: "Pants",
     price: 6499,
-    image: "/images/products/pants1.jpg",
-    description:
-      "Luxury streetwear cargo trousers with tailored comfort.",
+    image: "/images/products/cargo-01.jpg",
+    description: "Luxury streetwear cargo trousers with tailored comfort.",
   },
   {
     id: 4,
@@ -45,8 +42,7 @@ export const products: Product[] = [
     slug: "irg-bomber-jacket",
     category: "Jackets",
     price: 8999,
-    image: "/images/products/jacket1.jpg",
-    description:
-      "Premium bomber jacket inspired by modern luxury fashion.",
+    image: "/images/products/jacket-01.jpg",
+    description: "Premium bomber jacket inspired by modern luxury fashion.",
   },
 ];

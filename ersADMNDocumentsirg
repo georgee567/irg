@@ -1,0 +1,11 @@
+[33mcommit 9a04cd4d0b27a3e2d5da6f98e8b68fdeb8416068[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: George Kabiru <GeorgeKabiru27@gmail.com>
+Date:   Fri Aug 7 13:45:32 2026 +0300
+
+    docs: update readme with technical project summary
+
+[33mcommit 8f1775e5a409a559895bd79ca094f17b72789833[m
+Author: George Kabiru <georgekabiru27@gmail.com>
+Date:   Sat Jul 11 19:13:22 2026 +0300
+
+    Initial project setup with Next.js

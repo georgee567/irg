@@ -14,7 +14,6 @@ export default function PaymentMethods({
     "M-Pesa",
     "Visa",
     "Mastercard",
-    "PayPal",
   ];
 
   return (
@@ -38,12 +37,19 @@ export default function PaymentMethods({
                 : "border-[#222]"
             }`}
           >
-            {method}
+            <div className="flex items-center justify-between">
+              <span>{method}</span>
+              {payment === method ? <span className="text-sm text-[#D4AF37]">Selected</span> : null}
+            </div>
           </button>
 
         ))}
 
       </div>
+
+      <p className="mt-4 text-sm text-gray-400">
+        Payment selection is prepared for future provider integration. No live payment processing is connected yet.
+      </p>
 
     </div>
 

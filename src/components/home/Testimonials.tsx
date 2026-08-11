@@ -43,7 +43,7 @@ export default function Testimonials() {
             >
 
               <p className="text-lg leading-8 italic text-gray-300">
-                "{review.text}"
+                &ldquo;{review.text}&rdquo;
               </p>
 
               <h3 className="mt-8 font-semibold text-[#D4AF37]">
