@@ -63,8 +63,8 @@ export default function Footer() {
 
             <p>Kenya</p>
             <p>info@irg.com</p>
-            <p>0107117425</p>
-            <p>0739926782</p>
+            <p>+254 107117425</p>
+            <p>+254 739926782</p>
 
           </div>
 

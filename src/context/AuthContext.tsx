@@ -9,8 +9,10 @@ import {
 } from "react";
 
 export interface User {
+  id: string;
   name: string;
   email: string;
+  role: "CUSTOMER" | "ADMIN" | string;
   phone?: string;
   county?: string;
   city?: string;
@@ -20,9 +22,15 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
-  updateProfile: (data: User) => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<void>;
+  logout: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(
@@ -35,37 +43,126 @@ export function AuthProvider({
   children: ReactNode;
 }) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load user data from localStorage after hydration
-    // to prevent server/client mismatch
-    const saved = localStorage.getItem("irg-user");
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(JSON.parse(saved));
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          setUser(null);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Unable to restore authentication session:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    loadSession();
   }, []);
 
-  function login(data: User) {
-    setUser(data);
-    localStorage.setItem("irg-user", JSON.stringify(data));
+  async function login(email: string, password: string) {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to log in.");
+    }
+
+    setUser(data.user);
   }
 
-  function logout() {
-    setUser(null);
-    localStorage.removeItem("irg-user");
+  async function register(
+    name: string,
+    email: string,
+    password: string
+  ) {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Unable to create account."
+      );
+    }
+
+    // Registration creates the account but does not
+    // create a session, so log the new user in immediately.
+    await login(email, password);
   }
 
-  function updateProfile(data: User) {
-    setUser(data);
-    localStorage.setItem("irg-user", JSON.stringify(data));
+  async function logout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      setUser(null);
+    }
+  }
+
+  function updateProfile(data: Partial<User>) {
+    setUser((currentUser) => {
+      if (!currentUser) {
+        return null;
+      }
+
+      return {
+        ...currentUser,
+        ...data,
+      };
+    });
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        loading,
         login,
+        register,
         logout,
         updateProfile,
       }}
