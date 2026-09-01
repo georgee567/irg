@@ -6,17 +6,17 @@ import Link from "next/link";
 const collections = [
   {
     title: "Men",
-    image: "/images/hero-model.png",
+    image: "/images/hero-model.jpeg",
     href: "/shop?category=men",
   },
   {
     title: "Women",
-    image: "/images/hero-model.png",
+    image: "/images/hero-model.jpeg",
     href: "/shop?category=women",
   },
   {
     title: "Accessories",
-    image: "/images/hero-model.png",
+    image: "/images/hero-model.jpeg",
     href: "/shop?category=accessories",
   },
 ];

@@ -1,10 +1,10 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import { products } from "@/data/products";
+import { Product } from "@/types/models";
 
 interface Props {
   open: boolean;
@@ -16,6 +16,28 @@ export default function SearchOverlay({
   onClose,
 }: Props) {
   const [query, setQuery] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const response = await fetch("/api/products", {
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          throw new Error("Unable to load products.");
+        }
+
+        const data = await response.json();
+        setProducts(data.products ?? []);
+      } catch (error) {
+        console.error("Load products error:", error);
+      }
+    }
+
+    loadProducts();
+  }, []);
 
   const filtered = useMemo(() => {
     if (!query) return [];
@@ -23,7 +45,7 @@ export default function SearchOverlay({
     return products.filter((product) =>
       product.name.toLowerCase().includes(query.toLowerCase())
     );
-  }, [query]);
+  }, [query, products]);
 
   return (
     <div
@@ -34,9 +56,7 @@ export default function SearchOverlay({
       }`}
     >
       <div className="mx-auto mt-16 max-w-3xl rounded-3xl bg-[#090909] p-8">
-
         <div className="mb-6 flex items-center justify-between">
-
           <h2 className="font-serif text-4xl">
             Search
           </h2>
@@ -44,7 +64,6 @@ export default function SearchOverlay({
           <button onClick={onClose}>
             <X />
           </button>
-
         </div>
 
         <input
@@ -56,9 +75,7 @@ export default function SearchOverlay({
         />
 
         <div className="mt-8 space-y-3">
-
           {filtered.map((product) => (
-
             <Link
               key={product.id}
               href={`/product/${product.id}`}
@@ -70,16 +87,12 @@ export default function SearchOverlay({
               </div>
 
               <div className="mt-2 text-sm text-[#D4AF37]">
-                KSh {product.price.toLocaleString()}
+                KSh {Number(product.price).toLocaleString()}
               </div>
             </Link>
-
           ))}
-
         </div>
-
       </div>
-
     </div>
   );
 }

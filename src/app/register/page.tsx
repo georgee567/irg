@@ -65,6 +65,12 @@ export default function RegisterPage() {
     }
   }
 
+  const handleSocialSignIn = (provider: string) => {
+    console.info(
+      `${provider} social sign-in is ready for configuration once OAuth credentials are added.`
+    );
+  };
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-black px-8 py-24">
       <div className="w-full max-w-md rounded-[32px] border border-[#222] bg-[#090909] p-10">
@@ -75,6 +81,32 @@ export default function RegisterPage() {
         <h1 className="mt-5 text-center font-serif text-5xl text-white">
           Create Account
         </h1>
+
+        <div className="mt-8 space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-[#222]" />
+            <span className="text-[10px] uppercase tracking-[0.25em] text-gray-500">
+              Or continue with
+            </span>
+            <div className="h-px flex-1 bg-[#222]" />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleSocialSignIn("Google")}
+            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+          >
+            Continue with Google
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSocialSignIn("Facebook")}
+            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+          >
+            Continue with Facebook
+          </button>
+        </div>
 
         <form
           onSubmit={handleSubmit}
@@ -132,6 +164,10 @@ export default function RegisterPage() {
               : "Create Account"}
           </button>
         </form>
+
+        <p className="mt-6 text-center text-xs text-gray-500">
+          Social sign-in is ready for OAuth credentials once configured.
+        </p>
 
         <p className="mt-8 text-center text-gray-400">
           Already have an account?{" "}

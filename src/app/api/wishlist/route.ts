@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import { serializeProduct } from "@/lib/serialize";
 
 // GET /api/wishlist
 export async function GET() {
@@ -66,7 +55,13 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      wishlist,
+      wishlist: {
+        ...wishlist,
+        items: wishlist.items.map(item => ({
+          ...item,
+          product: serializeProduct(item.product),
+        })),
+      },
       itemCount: wishlist.items.length,
     });
   } catch (error) {

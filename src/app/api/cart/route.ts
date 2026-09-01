@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import { serializeDecimal } from "@/lib/serialize";
 
 // GET /api/cart
 export async function GET() {
@@ -73,7 +62,7 @@ export async function GET() {
     }
 
     const subtotal = cart.items.reduce((total, item) => {
-      return total + Number(item.variant.price) * item.quantity;
+      return total + serializeDecimal(item.variant.price) * item.quantity;
     }, 0);
 
     const itemCount = cart.items.reduce((total, item) => {
@@ -85,6 +74,13 @@ export async function GET() {
         ...cart,
         subtotal,
         itemCount,
+        items: cart.items.map(item => ({
+          ...item,
+          variant: {
+            ...item.variant,
+            price: serializeDecimal(item.variant.price),
+          },
+        })),
       },
     });
   } catch (error) {

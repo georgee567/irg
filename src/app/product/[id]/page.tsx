@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { products } from "@/data/products";
+import { prisma } from "@/lib/prisma";
+import { Product } from "@/types/models";
 
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
@@ -16,41 +17,53 @@ interface Props {
 export default async function ProductPage({
   params,
 }: Props) {
-
   const { id } = await params;
 
-  const product = products.find(
-    (p) => p.id === Number(id)
-  );
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      category: true,
+      variants: true,
+    },
+  });
 
   if (!product) {
-
     notFound();
-
   }
 
+  const serializedProduct: Product = {
+    ...product,
+    price: Number(product.price),
+    category: {
+      ...product.category,
+      createdAt: product.category.createdAt.toISOString(),
+      updatedAt: product.category.updatedAt.toISOString(),
+    },
+    variants: product.variants.map((variant) => ({
+      ...variant,
+      price: Number(variant.price),
+      createdAt: variant.createdAt.toISOString(),
+      updatedAt: variant.updatedAt.toISOString(),
+    })),
+    createdAt: product.createdAt.toISOString(),
+    updatedAt: product.updatedAt.toISOString(),
+  };
+
   return (
-
     <main className="min-h-screen bg-black text-white">
-
       <div className="mx-auto max-w-7xl px-8 py-24">
-
         <div className="grid gap-20 lg:grid-cols-2">
-
-          <ProductGallery product={product} />
-
-          <ProductInfo product={product} />
-
+          <ProductGallery product={serializedProduct} />
+          <ProductInfo product={serializedProduct} />
         </div>
 
         <ProductReviews />
 
-        <RelatedProducts />
-
+        <RelatedProducts
+          productId={serializedProduct.id}
+          categoryId={serializedProduct.categoryId}
+        />
       </div>
-
     </main>
-
   );
-
 }

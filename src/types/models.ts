@@ -1,82 +1,129 @@
-export interface Product {
-  id: number;
+// Shared types matching the Prisma models and API responses.
+
+export interface Category {
+  id: string;
   name: string;
   slug: string;
-  category: string;
-  price: number;
-  image: string;
-  description: string;
-  stock?: number;
-  status?: "In Stock" | "Limited" | "Out of Stock";
-  colors?: string[];
-  sizes?: string[];
+  createdAt: string;
+  updatedAt: string;
+  _count?: { products: number };
 }
 
-export interface CartItem extends Product {
+export interface ProductVariant {
+  id: string;
+  size: string;
+  color: string;
+  price: string | number;
+  stock: number;
+  productId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: string | number;
+  images: string[];
+  featured: boolean;
+  categoryId: string;
+  category: Category;
+  variants: ProductVariant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartItem {
+  id: string;
+  variantId: string;
+  productId: string;
+  name: string;
+  image: string;
+  price: number;
   quantity: number;
   selectedSize?: string;
   selectedColor?: string;
+  slug?: string;
+  category?: string;
+  stock?: number;
 }
 
 export interface WishlistItem {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  slug?: string;
-  category?: string;
+  id: string;
+  productId: string;
+  product: Product;
+  createdAt: string;
 }
 
 export interface User {
+  id: string;
   name: string;
   email: string;
-  phone?: string;
-  county?: string;
-  city?: string;
-  address?: string;
-  avatar?: string;
-  role?: "customer" | "admin";
+  role: "CUSTOMER" | "ADMIN";
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OrderItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  selectedSize?: string;
-  selectedColor?: string;
-}
-
-export type OrderStatus = "Processing" | "Packed" | "Shipped" | "Delivered";
-export type PaymentStatus = "Pending" | "Selected" | "Processed";
-
-export interface OrderSummary {
   id: string;
-  date: string;
-  status: OrderStatus;
-  payment: string;
-  paymentStatus: PaymentStatus;
-  customer: {
-    fullName: string;
-    email: string;
-    phone: string;
-    county: string;
-    city: string;
-    address: string;
-  };
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  discount: number;
-  total: number;
-  items: OrderItem[];
+  orderId: string;
+  productId: string;
+  variantId: string;
+  productName: string;
+  size: string;
+  color: string;
+  unitPrice: string | number;
+  quantity: number;
+  lineTotal: string | number;
+  createdAt: string;
 }
 
-export interface CheckoutFormValues {
-  fullName: string;
-  email: string;
-  phone: string;
-  county: string;
-  city: string;
-  address: string;
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "PROCESSING"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
+
+export type PaymentStatusEnum =
+  | "PENDING"
+  | "PAID"
+  | "FAILED"
+  | "REFUNDED";
+
+export interface Payment {
+  id: string;
+  orderId: string;
+  provider: string;
+  method: string;
+  transactionReference: string | null;
+  amount: string | number;
+  currency: string;
+  status: PaymentStatusEnum;
+  providerResponse: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatusEnum;
+  subtotal: string | number;
+  shipping: string | number;
+  total: string | number;
+  shippingName: string;
+  shippingEmail: string;
+  shippingPhone: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingCountry: string;
+  items: OrderItem[];
+  payments: Payment[];
+  createdAt: string;
+  updatedAt: string;
 }

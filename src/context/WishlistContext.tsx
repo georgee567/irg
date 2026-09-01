@@ -8,72 +8,136 @@ import {
   ReactNode,
 } from "react";
 
-export interface WishlistItem {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  slug?: string;
-  category?: string;
-}
+import { Product, WishlistItem } from "@/types/models";
 
 interface WishlistContextType {
   wishlist: WishlistItem[];
-  addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: number) => void;
+  loading: boolean;
+  addToWishlist: (productId: string) => Promise<void>;
+  removeFromWishlist: (itemId: string) => Promise<void>;
+  refreshWishlist: () => Promise<void>;
 }
 
-const WishlistContext = createContext<WishlistContextType | null>(null);
+const WishlistContext = createContext<WishlistContextType | undefined>(
+  undefined
+);
 
 export function WishlistProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [wishlist, setWishlist] =
-    useState<WishlistItem[]>([]);
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function refreshWishlist() {
+    try {
+      const response = await fetch("/api/wishlist", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setWishlist([]);
+          return;
+        }
+
+        throw new Error("Unable to load wishlist.");
+      }
+
+      const data = await response.json();
+      setWishlist(data.wishlist?.items ?? []);
+    } catch (error) {
+      console.error("Load wishlist error:", error);
+      setWishlist([]);
+    }
+  }
 
   useEffect(() => {
-    // Load wishlist data from localStorage after hydration
-    // to prevent server/client mismatch
-    const saved = localStorage.getItem("irg-wishlist");
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setWishlist(JSON.parse(saved));
+    let mounted = true;
+
+    async function load() {
+      try {
+        const response = await fetch("/api/wishlist", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!mounted) return;
+
+        if (response.status === 401) {
+          setWishlist([]);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Unable to load wishlist.");
+        }
+
+        const data = await response.json();
+        setWishlist(data.wishlist?.items ?? []);
+      } catch (error) {
+        console.error("Initial wishlist load error:", error);
+        setWishlist([]);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "irg-wishlist",
-      JSON.stringify(wishlist)
-    );
-  }, [wishlist]);
+  async function addToWishlist(productId: string) {
+    const response = await fetch("/api/wishlist/items", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ productId }),
+    });
 
-  const addToWishlist = (item: WishlistItem) => {
+    const data = await response.json();
 
-    if (
-      wishlist.find((p) => p.id === item.id)
-    )
-      return;
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to add product to wishlist.");
+    }
 
-    setWishlist((prev) => [...prev, item]);
-  };
+    await refreshWishlist();
+  }
 
-  const removeFromWishlist = (
-    id: number
-  ) => {
-    setWishlist((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  };
+  async function removeFromWishlist(itemId: string) {
+    const response = await fetch(`/api/wishlist/items/${itemId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to remove wishlist item.");
+    }
+
+    await refreshWishlist();
+  }
 
   return (
     <WishlistContext.Provider
       value={{
         wishlist,
+        loading,
         addToWishlist,
         removeFromWishlist,
+        refreshWishlist,
       }}
     >
       {children}
@@ -82,14 +146,17 @@ export function WishlistProvider({
 }
 
 export function useWishlist() {
+  const context = useContext(WishlistContext);
 
-  const context =
-    useContext(WishlistContext);
-
-  if (!context)
+  if (!context) {
     throw new Error(
-      "WishlistProvider missing"
+      "useWishlist must be used inside WishlistProvider"
     );
+  }
 
   return context;
 }
+
+// Re-export for convenience so components can import the type
+// from the same place they import the hook.
+export type { Product, WishlistItem };

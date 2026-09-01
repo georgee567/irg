@@ -1,19 +1,7 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
 
 export async function PATCH(
   request: Request,

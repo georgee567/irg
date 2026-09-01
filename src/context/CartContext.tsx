@@ -9,7 +9,9 @@ import {
 } from "react";
 
 export interface CartItem {
-  id: number;
+  id: string;
+  variantId: string;
+  productId: string;
   name: string;
   image: string;
   price: number;
@@ -18,20 +20,21 @@ export interface CartItem {
   selectedColor?: string;
   slug?: string;
   category?: string;
+  stock?: number;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
-  clearCart: () => void;
+  loading: boolean;
+  addToCart: (variantId: string, quantity?: number) => Promise<void>;
+  increaseQuantity: (id: string) => Promise<void>;
+  decreaseQuantity: (id: string) => Promise<void>;
+  removeFromCart: (id: string) => Promise<void>;
+  clearCart: () => Promise<void>;
+  refreshCart: () => Promise<void>;
 }
 
-const CartContext = createContext<CartContextType | undefined>(
-  undefined
-);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({
   children,
@@ -39,98 +42,269 @@ export function CartProvider({
   children: ReactNode;
 }) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Load cart data from localStorage after hydration
-    // to prevent server/client mismatch
-    const saved = localStorage.getItem("irg-cart");
-    if (saved) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCart(JSON.parse(saved));
-    }
-  }, []);
+  async function refreshCart() {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
 
-  useEffect(() => {
-    localStorage.setItem(
-      "irg-cart",
-      JSON.stringify(cart)
-    );
-  }, [cart]);
+      if (!response.ok) {
+        if (response.status === 401) {
+          setCart([]);
+          return;
+        }
 
-  const addToCart = (item: CartItem) => {
-    setCart((prev) => {
-      const existing = prev.find(
-        (p) => p.id === item.id
-      );
-
-      if (existing) {
-        return prev.map((p) =>
-          p.id === item.id
-            ? {
-                ...p,
-                quantity: p.quantity + 1,
-              }
-            : p
-        );
+        throw new Error("Unable to load cart.");
       }
 
-      return [
-  ...prev,
-  {
-    ...item,
-    quantity: item.quantity || 1,
-  },
-];
+      const data = await response.json();
+
+      const items: CartItem[] = (data.cart?.items ?? []).map(
+        (item: {
+          id: string;
+          quantity: number;
+          variant: {
+            id: string;
+            size: string;
+            color: string;
+            price: string | number;
+            stock: number;
+            product: {
+              id: string;
+              name: string;
+              slug: string;
+              images: string[];
+              category?: {
+                name?: string;
+              } | null;
+            };
+          };
+        }) => ({
+          id: item.id,
+          variantId: item.variant.id,
+          productId: item.variant.product.id,
+          name: item.variant.product.name,
+          image: item.variant.product.images?.[0] ?? "",
+          price: Number(item.variant.price),
+          quantity: item.quantity,
+          selectedSize: item.variant.size,
+          selectedColor: item.variant.color,
+          slug: item.variant.product.slug,
+          category: item.variant.product.category?.name,
+          stock: item.variant.stock,
+        })
+      );
+
+      setCart(items);
+    } catch (error) {
+      console.error("Load cart error:", error);
+      setCart([]);
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function load() {
+      try {
+        const response = await fetch("/api/cart", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!mounted) return;
+
+        if (response.status === 401) {
+          setCart([]);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error("Unable to load cart.");
+        }
+
+        const data = await response.json();
+
+        const items: CartItem[] = (data.cart?.items ?? []).map(
+          (item: {
+            id: string;
+            quantity: number;
+            variant: {
+              id: string;
+              size: string;
+              color: string;
+              price: string | number;
+              stock: number;
+              product: {
+                id: string;
+                name: string;
+                slug: string;
+                images: string[];
+                category?: {
+                  name?: string;
+                } | null;
+              };
+            };
+          }) => ({
+            id: item.id,
+            variantId: item.variant.id,
+            productId: item.variant.product.id,
+            name: item.variant.product.name,
+            image: item.variant.product.images?.[0] ?? "",
+            price: Number(item.variant.price),
+            quantity: item.quantity,
+            selectedSize: item.variant.size,
+            selectedColor: item.variant.color,
+            slug: item.variant.product.slug,
+            category: item.variant.product.category?.name,
+            stock: item.variant.stock,
+          })
+        );
+
+        setCart(items);
+      } catch (error) {
+        console.error("Initial cart load error:", error);
+        setCart([]);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  async function addToCart(
+    variantId: string,
+    quantity: number = 1
+  ) {
+    const response = await fetch("/api/cart/items", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        variantId,
+        quantity,
+      }),
     });
-  };
 
-  const increaseQuantity = (id: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item
-      )
-    );
-  };
+    const data = await response.json();
 
-  const decreaseQuantity = (id: number) => {
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to add item to cart.");
+    }
 
-  const removeFromCart = (id: number) => {
-    setCart((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  };
+    await refreshCart();
+  }
 
-  const clearCart = () => {
+  async function increaseQuantity(id: string) {
+    const item = cart.find((cartItem) => cartItem.id === id);
+
+    if (!item) return;
+
+    const response = await fetch(`/api/cart/items/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        quantity: item.quantity + 1,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to increase quantity.");
+    }
+
+    await refreshCart();
+  }
+
+  async function decreaseQuantity(id: string) {
+    const item = cart.find((cartItem) => cartItem.id === id);
+
+    if (!item) return;
+
+    if (item.quantity <= 1) {
+      await removeFromCart(id);
+      return;
+    }
+
+    const response = await fetch(`/api/cart/items/${id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        quantity: item.quantity - 1,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to decrease quantity.");
+    }
+
+    await refreshCart();
+  }
+
+  async function removeFromCart(id: string) {
+    const response = await fetch(`/api/cart/items/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to remove item.");
+    }
+
+    await refreshCart();
+  }
+
+  async function clearCart() {
+    const response = await fetch("/api/cart", {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to clear cart.");
+    }
+
     setCart([]);
-  };
+  }
 
   return (
     <CartContext.Provider
       value={{
         cart,
+        loading,
         addToCart,
         increaseQuantity,
         decreaseQuantity,
         removeFromCart,
         clearCart,
+        refreshCart,
       }}
     >
       {children}

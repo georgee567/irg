@@ -55,6 +55,10 @@ export async function POST(request: Request) {
 
     const session = await createSession(user.id);
 
+    const isHttpsRequest =
+      request.headers.get("x-forwarded-proto") === "https" ||
+      request.headers.get("origin")?.startsWith("https://") === true;
+
     const response = NextResponse.json({
       message: "Login successful.",
       user: {
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
       name: SESSION_COOKIE,
       value: session.token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttpsRequest,
       sameSite: "lax",
       path: "/",
       expires: session.expiresAt,

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 import PaymentMethods from "@/components/checkout/PaymentMethods";
 import PromoCode from "@/components/checkout/PromoCode";
@@ -13,6 +14,7 @@ import CardForm from "@/components/checkout/CardForm";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
 
   const [payment, setPayment] = useState("M-Pesa");
@@ -23,6 +25,8 @@ export default function CheckoutPage() {
   const [county, setCounty] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
+  const [placing, setPlacing] = useState(false);
+  const [error, setError] = useState("");
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 0 ? 500 : 0;
@@ -30,47 +34,63 @@ export default function CheckoutPage() {
   const discountAmount = subtotal * (discount / 100);
   const total = subtotal + shipping + tax - discountAmount;
 
-  const placeOrder = useCallback(() => {
+  const placeOrder = useCallback(async () => {
     if (cart.length === 0) {
-      alert("Your cart is empty.");
+      setError("Your cart is empty.");
       return;
     }
 
     if (!fullName || !email || !phone || !county || !city || !address) {
-      alert("Please fill all required fields.");
+      setError("Please fill all required fields.");
       return;
     }
 
-    const timestamp = Date.now();
-    const currentDate = new Date().toLocaleDateString();
-    const order = {
-      id: `IRG-${timestamp}`,
-      date: currentDate,
-      status: "Processing",
-      payment,
-      customer: {
-        fullName,
-        email,
-        phone,
-        county,
-        city,
-        address,
-      },
-      subtotal,
-      shipping,
-      tax,
-      discount,
-      total,
-      items: cart.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price, selectedSize: item.selectedSize, selectedColor: item.selectedColor })),
-    };
+    if (!user) {
+      setError("Please log in to place an order.");
+      return;
+    }
 
-    const existingOrders = JSON.parse(localStorage.getItem("irg-orders") || "[]");
-    existingOrders.unshift(order);
-    localStorage.setItem("irg-orders", JSON.stringify(existingOrders));
+    try {
+      setPlacing(true);
+      setError("");
 
-    clearCart();
-    router.push("/order-success");
-  }, [cart, clearCart, router, fullName, email, phone, county, city, address, payment, discount, subtotal, shipping, tax, total]);
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          shippingName: fullName,
+          shippingEmail: email,
+          shippingPhone: phone,
+          shippingAddress: address,
+          shippingCity: city,
+          shippingCountry: county,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to place order.");
+      }
+
+      await clearCart();
+
+      router.push(`/order-success?orderId=${data.order.id}`);
+    } catch (error) {
+      console.error("Place order error:", error);
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to place order."
+      );
+    } finally {
+      setPlacing(false);
+    }
+  }, [cart, clearCart, router, user, fullName, email, phone, county, city, address, payment, discount, subtotal, shipping, tax, total]);
 
   if (cart.length === 0) {
     return (
@@ -136,8 +156,16 @@ export default function CheckoutPage() {
               <div className="flex justify-between border-t border-[#222] pt-5 text-2xl font-bold"><span>Total</span><span className="text-[#D4AF37]">KSh {total.toLocaleString()}</span></div>
             </div>
 
-            <button onClick={placeOrder} className="mt-10 w-full rounded-xl bg-[#D4AF37] py-5 font-bold text-black transition hover:opacity-90">
-              Place Order
+            {error && (
+              <p className="mt-4 text-sm text-red-500">{error}</p>
+            )}
+
+            <button
+              onClick={placeOrder}
+              disabled={placing}
+              className="mt-10 w-full rounded-xl bg-[#D4AF37] py-5 font-bold text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {placing ? "Placing Order..." : "Place Order"}
             </button>
           </div>
         </div>

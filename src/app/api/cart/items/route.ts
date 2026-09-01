@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import { serializeDecimal } from "@/lib/serialize";
 
 // POST /api/cart/items
 export async function POST(request: Request) {
@@ -126,7 +115,13 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         message: "Cart item quantity updated.",
-        item: updatedItem,
+        item: {
+          ...updatedItem,
+          variant: {
+            ...updatedItem.variant,
+            price: serializeDecimal(updatedItem.variant.price),
+          },
+        },
       });
     }
 
@@ -148,7 +143,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: "Item added to cart.",
-        item,
+        item: {
+          ...item,
+          variant: {
+            ...item.variant,
+            price: serializeDecimal(item.variant.price),
+          },
+        },
       },
       { status: 201 }
     );

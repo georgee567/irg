@@ -17,7 +17,7 @@ export default function ContactPage() {
           <br />
           Phone: +254 107117425
           <br />
-          Phone: +254 739926782
+          Phone: +254 715362959
           <br />
           Nairobi, Kenya
         </p>

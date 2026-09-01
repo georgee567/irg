@@ -1,19 +1,8 @@
 import { NextResponse } from "next/server";
-import { Pool } from "pg";
-import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient } from "@/generated/prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const adapter = new PrismaPg(pool);
-
-const prisma = new PrismaClient({
-  adapter,
-});
+import { serializeProduct } from "@/lib/serialize";
 
 // POST /api/wishlist/items
 export async function POST(request: Request) {
@@ -40,6 +29,10 @@ export async function POST(request: Request) {
     const product = await prisma.product.findUnique({
       where: {
         id: productId,
+      },
+      include: {
+        category: true,
+        variants: true,
       },
     });
 
@@ -101,7 +94,10 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: "Product added to wishlist.",
-        item,
+        item: {
+          ...item,
+          product: serializeProduct(item.product),
+        },
       },
       { status: 201 }
     );

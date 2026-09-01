@@ -67,7 +67,10 @@ export function AuthProvider({
           setUser(null);
         }
       } catch (error) {
-        console.error("Unable to restore authentication session:", error);
+        console.error(
+          "Unable to restore authentication session:",
+          error
+        );
         setUser(null);
       } finally {
         setLoading(false);

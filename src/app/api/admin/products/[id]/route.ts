@@ -97,7 +97,9 @@ export async function PATCH(
       "name",
       "description",
       "slug",
-      "image",
+      "images",
+      "featured",
+      "price",
       "categoryId",
     ] as const;
 
@@ -105,32 +107,47 @@ export async function PATCH(
       name?: string;
       description?: string;
       slug?: string;
-      image?: string | null;
+      images?: string[];
+      featured?: boolean;
+      price?: number;
       categoryId?: string;
     } = {};
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
-        if (
-          field !== "image" &&
-          typeof body[field] !== "string"
-        ) {
+        if (field === "images") {
+          if (!Array.isArray(body[field])) {
+            return NextResponse.json(
+              { error: "images must be an array of strings." },
+              { status: 400 }
+            );
+          }
+          data.images = body[field];
+          continue;
+        }
+
+        if (field === "featured") {
+          data.featured = Boolean(body[field]);
+          continue;
+        }
+
+        if (field === "price") {
+          const numericPrice = Number(body[field]);
+          if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+            return NextResponse.json(
+              { error: "Invalid product price." },
+              { status: 400 }
+            );
+          }
+          data.price = numericPrice;
+          continue;
+        }
+
+        if (typeof body[field] !== "string") {
           return NextResponse.json(
             { error: `${field} must be a string.` },
             { status: 400 }
           );
-        }
-
-        if (field === "image") {
-          if (
-            body[field] !== null &&
-            typeof body[field] !== "string"
-          ) {
-            return NextResponse.json(
-              { error: "image must be a string or null." },
-              { status: 400 }
-            );
-          }
         }
 
         data[field] = body[field];

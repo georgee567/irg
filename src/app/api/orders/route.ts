@@ -13,6 +13,43 @@ type CheckoutBody = {
   shippingCountry?: string;
 };
 
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        items: true,
+        payments: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json({
+      orders,
+    });
+  } catch (error) {
+    console.error("Get orders error:", error);
+
+    return NextResponse.json(
+      { error: "Unable to fetch orders." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();

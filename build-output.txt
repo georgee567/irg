@@ -1,0 +1,77 @@
+﻿
+> irg@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.2.10 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 29.8s
+  Running TypeScript ...
+  Finished TypeScript in 23.6s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/41) ...
+  Generating static pages using 7 workers (10/41) 
+  Generating static pages using 7 workers (20/41) 
+  Generating static pages using 7 workers (30/41) 
+Γ£ô Generating static pages using 7 workers (41/41) in 2.4s
+  Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /about
+Γö£ Γùï /account
+Γö£ Γùï /account/login
+Γö£ Γùï /account/register
+Γö£ ╞Æ /api/admin/categories
+Γö£ ╞Æ /api/admin/categories/[id]
+Γö£ ╞Æ /api/admin/dashboard
+Γö£ ╞Æ /api/admin/inventory/[variantId]
+Γö£ ╞Æ /api/admin/orders
+Γö£ ╞Æ /api/admin/products
+Γö£ ╞Æ /api/admin/products/[id]
+Γö£ ╞Æ /api/admin/products/[id]/variants
+Γö£ ╞Æ /api/admin/users
+Γö£ ╞Æ /api/admin/users/[id]
+Γö£ ╞Æ /api/admin/variants/[id]
+Γö£ ╞Æ /api/auth/login
+Γö£ ╞Æ /api/auth/logout
+Γö£ ╞Æ /api/auth/me
+Γö£ ╞Æ /api/auth/register
+Γö£ ╞Æ /api/cart
+Γö£ ╞Æ /api/cart/items
+Γö£ ╞Æ /api/cart/items/[id]
+Γö£ ╞Æ /api/categories
+Γö£ ╞Æ /api/categories/[id]
+Γö£ ╞Æ /api/orders
+Γö£ ╞Æ /api/orders/[id]
+Γö£ ╞Æ /api/payments
+Γö£ ╞Æ /api/payments/[orderId]
+Γö£ ╞Æ /api/payments/webhook
+Γö£ ╞Æ /api/products
+Γö£ ╞Æ /api/products/[id]
+Γö£ ╞Æ /api/wishlist
+Γö£ ╞Æ /api/wishlist/items
+Γö£ ╞Æ /api/wishlist/items/[id]
+Γö£ Γùï /cart
+Γö£ Γùï /categories
+Γö£ Γùï /checkout
+Γö£ Γùï /collections
+Γö£ Γùï /contact
+Γö£ Γùï /custom
+Γö£ Γùï /journal
+Γö£ Γùï /login
+Γö£ Γùï /lookbook
+Γö£ Γùï /order-success
+Γö£ Γùï /orders
+Γö£ ╞Æ /product/[id]
+Γö£ Γùï /register
+Γö£ Γùï /search
+Γö£ Γùï /shop
+Γöö Γùï /wishlist
+
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

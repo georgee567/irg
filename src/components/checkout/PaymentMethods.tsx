@@ -12,6 +12,7 @@ export default function PaymentMethods({
 
   const methods = [
     "M-Pesa",
+    "PayPal",
     "Visa",
     "Mastercard",
   ];
@@ -48,7 +49,7 @@ export default function PaymentMethods({
       </div>
 
       <p className="mt-4 text-sm text-gray-400">
-        Payment selection is prepared for future provider integration. No live payment processing is connected yet.
+        Supported options are prepared for the live provider flow: M-Pesa and PayPal can be connected with credentials, while the card methods remain ready for checkout integration.
       </p>
 
     </div>
