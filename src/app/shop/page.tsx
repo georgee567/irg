@@ -146,7 +146,7 @@ export default function ShopPage() {
               <Link href={`/product/${product.id}`} className="flex flex-1 flex-col">
                 <div className="relative h-80">
                   <Image
-                    src={product.images?.[0] || "/placeholder.jpg"}
+                    src={product.images?.[0] || "/images/products/jacket-01.jpg"}
                     alt={product.name}
                     fill
                     className="object-cover transition duration-300 hover:scale-105"
