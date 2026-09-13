@@ -118,8 +118,8 @@ export async function DELETE(
       include: {
         _count: {
           select: {
-            cartItems: true,
-            orderItems: true,
+            CartItem: true,
+            OrderItem: true,
           },
         },
       },
@@ -133,8 +133,8 @@ export async function DELETE(
     }
 
     if (
-      variant._count.cartItems > 0 ||
-      variant._count.orderItems > 0
+      variant._count.CartItem > 0 ||
+      variant._count.OrderItem > 0
     ) {
       return NextResponse.json(
         {

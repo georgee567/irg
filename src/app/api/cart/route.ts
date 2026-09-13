@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
@@ -21,13 +22,13 @@ export async function GET() {
         userId: user.id,
       },
       include: {
-        items: {
+        CartItem: {
           include: {
-            variant: {
+            ProductVariant: {
               include: {
-                product: {
+                Product: {
                   include: {
-                    category: true,
+                    Category: true,
                   },
                 },
               },
@@ -41,16 +42,18 @@ export async function GET() {
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
+          id: crypto.randomUUID(),
           userId: user.id,
+          updatedAt: new Date(),
         },
         include: {
-          items: {
+          CartItem: {
             include: {
-              variant: {
+              ProductVariant: {
                 include: {
-                  product: {
+                  Product: {
                     include: {
-                      category: true,
+                      Category: true,
                     },
                   },
                 },
@@ -61,11 +64,11 @@ export async function GET() {
       });
     }
 
-    const subtotal = cart.items.reduce((total, item) => {
-      return total + serializeDecimal(item.variant.price) * item.quantity;
+    const subtotal = cart.CartItem.reduce((total, item) => {
+      return total + serializeDecimal(item.ProductVariant.price) * item.quantity;
     }, 0);
 
-    const itemCount = cart.items.reduce((total, item) => {
+    const itemCount = cart.CartItem.reduce((total, item) => {
       return total + item.quantity;
     }, 0);
 
@@ -74,11 +77,11 @@ export async function GET() {
         ...cart,
         subtotal,
         itemCount,
-        items: cart.items.map(item => ({
+        items: cart.CartItem.map(item => ({
           ...item,
           variant: {
-            ...item.variant,
-            price: serializeDecimal(item.variant.price),
+            ...item.ProductVariant,
+            price: serializeDecimal(item.ProductVariant.price),
           },
         })),
       },

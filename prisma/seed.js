@@ -1,26 +1,56 @@
-const { PrismaClient } = require("../src/generated/prisma/client");
+import "dotenv/config";
 
-const prisma = new PrismaClient();
+import { PrismaPg } from "@prisma/adapter-pg";
+import bcrypt from "bcryptjs";
+import { Pool } from "pg";
+
+import { PrismaClient } from "@/generated/prisma/client";
+
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is not set");
+}
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const adapter = new PrismaPg(pool);
+
+const prisma = new PrismaClient({
+  adapter,
+});
 
 async function main() {
-  console.log("🌱 Starting database seed...");
+  console.log("🌱 Starting IRG database seed...\n");
 
-  // Clear existing data
+  // =========================================================
+  // 1. CLEAR EXISTING DATA
+  // =========================================================
+
   await prisma.cartItem.deleteMany();
   await prisma.cart.deleteMany();
+
   await prisma.wishlistItem.deleteMany();
   await prisma.wishlist.deleteMany();
+
   await prisma.orderItem.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.order.deleteMany();
+
   await prisma.productVariant.deleteMany();
   await prisma.product.deleteMany();
+
   await prisma.category.deleteMany();
+
+  await prisma.session.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log("✓ Cleared existing data");
+  console.log("✓ Existing database data cleared");
 
-  // Create categories
+  // =========================================================
+  // 2. CREATE CATEGORIES
+  // =========================================================
+
   const menCategory = await prisma.category.create({
     data: {
       name: "Men",
@@ -42,154 +72,63 @@ async function main() {
     },
   });
 
-  console.log("✓ Created categories");
+  console.log("✓ Categories created");
 
-  // Create products
-  const products = [
-    {
-      name: "Classic Black Blazer",
-      slug: "classic-black-blazer",
-      description: "Timeless black blazer perfect for any occasion. Premium fabric with impeccable tailoring.",
-      price: "45000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: true,
-      categoryId: menCategory.id,
-      variants: [
-        { size: "XS", color: "Black", price: "45000", stock: 10 },
-        { size: "S", color: "Black", price: "45000", stock: 15 },
-        { size: "M", color: "Black", price: "45000", stock: 20 },
-        { size: "L", color: "Black", price: "45000", stock: 18 },
-        { size: "XL", color: "Black", price: "45000", stock: 12 },
-      ],
-    },
-    {
-      name: "Premium Denim Jacket",
-      slug: "premium-denim-jacket",
-      description: "High-quality denim jacket with contemporary design. Perfect for layering.",
-      price: "38000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: true,
-      categoryId: menCategory.id,
-      variants: [
-        { size: "S", color: "Blue", price: "38000", stock: 12 },
-        { size: "M", color: "Blue", price: "38000", stock: 15 },
-        { size: "L", color: "Blue", price: "38000", stock: 14 },
-        { size: "XL", color: "Blue", price: "38000", stock: 10 },
-      ],
-    },
-    {
-      name: "Silk Slip Dress",
-      slug: "silk-slip-dress",
-      description: "Elegant silk slip dress in classic black. Perfect for evening wear.",
-      price: "52000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: true,
-      categoryId: womenCategory.id,
-      variants: [
-        { size: "XS", color: "Black", price: "52000", stock: 8 },
-        { size: "S", color: "Black", price: "52000", stock: 10 },
-        { size: "M", color: "Black", price: "52000", stock: 12 },
-        { size: "L", color: "Black", price: "52000", stock: 9 },
-      ],
-    },
-    {
-      name: "Designer Leather Belt",
-      slug: "designer-leather-belt",
-      description: "Premium Italian leather belt with gold buckle. A statement accessory.",
-      price: "18000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: false,
-      categoryId: accessoriesCategory.id,
-      variants: [
-        { size: "S", color: "Black", price: "18000", stock: 20 },
-        { size: "M", color: "Black", price: "18000", stock: 25 },
-        { size: "L", color: "Brown", price: "18000", stock: 18 },
-        { size: "XL", color: "Brown", price: "18000", stock: 15 },
-      ],
-    },
-    {
-      name: "Luxury Cashmere Sweater",
-      slug: "luxury-cashmere-sweater",
-      description: "100% premium cashmere sweater. Soft, luxurious, and timeless.",
-      price: "65000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: true,
-      categoryId: womenCategory.id,
-      variants: [
-        { size: "XS", color: "Cream", price: "65000", stock: 7 },
-        { size: "S", color: "Cream", price: "65000", stock: 9 },
-        { size: "M", color: "Cream", price: "65000", stock: 11 },
-        { size: "L", color: "Navy", price: "65000", stock: 8 },
-      ],
-    },
-    {
-      name: "Modern T-Shirt",
-      slug: "modern-t-shirt",
-      description: "Contemporary cotton t-shirt with premium finish. Versatile everyday wear.",
-      price: "12000",
-      images: ["/images/products/jacket-01.jpg"],
-      featured: false,
-      categoryId: menCategory.id,
-      variants: [
-        { size: "XS", color: "White", price: "12000", stock: 30 },
-        { size: "S", color: "White", price: "12000", stock: 35 },
-        { size: "M", color: "White", price: "12000", stock: 40 },
-        { size: "L", color: "Black", price: "12000", stock: 35 },
-        { size: "XL", color: "Black", price: "12000", stock: 25 },
-      ],
-    },
-  ];
+  // =========================================================
+  // 3. CREATE PASSWORD HASH
+  // =========================================================
 
-  for (const productData of products) {
-    const { variants, ...product } = productData;
+  const password = "password";
 
-    const createdProduct = await prisma.product.create({
-      data: {
-        ...product,
-        variants: {
-          create: variants.map((v) => ({
-            ...v,
-            price: v.price,
-          })),
-        },
-      },
-    });
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log(`✓ Created product: ${createdProduct.name}`);
-  }
+  console.log("✓ Password hash generated");
 
-  console.log("✓ Created 6 products with variants");
+  // =========================================================
+  // 4. CREATE ADMIN USER
+  // =========================================================
 
-  // Create admin user (bcrypt hash of 'password')
   const adminUser = await prisma.user.create({
     data: {
-      name: "Admin User",
+      name: "IRG Admin",
       email: "admin@irg.com",
-      password: "$2a$10$VU2FP0Rz.qnZhNHT3ZBZoOoL6M1k7q8L2q3K8L9M0N1O2P3Q4R5S",
+      password: hashedPassword,
       role: "ADMIN",
     },
   });
 
-  console.log(`✓ Created admin user: ${adminUser.email}`);
+  console.log(`✓ Admin created: ${adminUser.email}`);
 
-  // Create test customer user
+  // =========================================================
+  // 5. CREATE TEST CUSTOMER
+  // =========================================================
+
   const customerUser = await prisma.user.create({
     data: {
       name: "Test Customer",
       email: "customer@example.com",
-      password: "$2a$10$VU2FP0Rz.qnZhNHT3ZBZoOoL6M1k7q8L2q3K8L9M0N1O2P3Q4R5S",
+      password: hashedPassword,
       role: "CUSTOMER",
     },
   });
 
-  console.log(`✓ Created customer user: ${customerUser.email}`);
+  console.log(`✓ Customer created: ${customerUser.email}`);
 
-  // Create empty cart and wishlist for customer
+  // =========================================================
+  // 6. CREATE CUSTOMER CART
+  // =========================================================
+
   await prisma.cart.create({
     data: {
       userId: customerUser.id,
     },
   });
+
+  console.log("✓ Customer cart created");
+
+  // =========================================================
+  // 7. CREATE CUSTOMER WISHLIST
+  // =========================================================
 
   await prisma.wishlist.create({
     data: {
@@ -197,16 +136,176 @@ async function main() {
     },
   });
 
-  console.log("✓ Created cart and wishlist for customer");
+  console.log("✓ Customer wishlist created");
 
-  console.log("✅ Database seed completed successfully!");
+  // =========================================================
+  // 8. IRG PRODUCTS
+  // =========================================================
+
+  const products = [
+    {
+      name: "IRG Signature Luxury Bag",
+
+      slug: "irg-signature-luxury-bag",
+
+      description:
+        "A premium IRG luxury bag designed with a refined modern silhouette and signature branding. Crafted for everyday style and elevated streetwear.",
+
+      price: "25000",
+
+      images: ["/images/products/bag-01.png"],
+
+      featured: true,
+
+      categoryId: accessoriesCategory.id,
+
+      variants: [
+        {
+          size: "One Size",
+          color: "Black",
+          price: "25000",
+          stock: 10,
+        },
+      ],
+    },
+
+    {
+      name: "IRG Premium Shoulder Bag",
+
+      slug: "irg-premium-shoulder-bag",
+
+      description:
+        "A premium IRG shoulder bag combining luxury design, modern functionality, and distinctive IRG branding.",
+
+      price: "28000",
+
+      images: ["/images/products/bag-02.png"],
+
+      featured: true,
+
+      categoryId: accessoriesCategory.id,
+
+      variants: [
+        {
+          size: "One Size",
+          color: "Black",
+          price: "28000",
+          stock: 10,
+        },
+      ],
+    },
+
+    {
+      name: "IRG Signature Performance Shorts",
+
+      slug: "irg-signature-performance-shorts",
+
+      description:
+        "Premium IRG signature shorts designed for comfort, movement, and modern luxury streetwear. Finished with distinctive IRG branding.",
+
+      price: "8500",
+
+      images: ["/images/products/shorts-01.png"],
+
+      featured: true,
+
+      categoryId: menCategory.id,
+
+      variants: [
+        {
+          size: "S",
+          color: "Yellow",
+          price: "8500",
+          stock: 10,
+        },
+
+        {
+          size: "M",
+          color: "Yellow",
+          price: "8500",
+          stock: 15,
+        },
+
+        {
+          size: "L",
+          color: "Yellow",
+          price: "8500",
+          stock: 12,
+        },
+
+        {
+          size: "XL",
+          color: "Yellow",
+          price: "8500",
+          stock: 8,
+        },
+      ],
+    },
+  ];
+
+  // =========================================================
+  // 9. CREATE PRODUCTS
+  // =========================================================
+
+  for (const productData of products) {
+    const { variants, ...product } = productData;
+
+    const createdProduct = await prisma.product.create({
+      data: {
+        ...product,
+
+        variants: {
+          create: variants,
+        },
+      },
+
+      include: {
+        ProductVariant: true,
+        Category: true,
+      },
+    });
+
+    console.log(`✓ Product created: ${createdProduct.name}`);
+  }
+
+  // =========================================================
+  // 10. FINISHED
+  // =========================================================
+
+  console.log("\n========================================");
+  console.log("✅ IRG DATABASE SEED COMPLETED");
+  console.log("========================================");
+
+  console.log("\nAdmin login:");
+  console.log("Email:    admin@irg.com");
+  console.log("Password: password");
+
+  console.log("\nCustomer login:");
+  console.log("Email:    customer@example.com");
+  console.log("Password: password");
+
+  console.log("\nProducts created:");
+  console.log("1. IRG Signature Luxury Bag");
+  console.log("2. IRG Premium Shoulder Bag");
+  console.log("3. IRG Signature Performance Shorts");
+
+  console.log("\nImages:");
+  console.log("/images/products/bag-01.png");
+  console.log("/images/products/bag-02.png");
+  console.log("/images/products/shorts-01.png");
+
+  console.log("\nAdmin dashboard:");
+  console.log("/admin/products");
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Seed failed:", e);
+  .catch((error) => {
+    console.error("\n❌ IRG SEED FAILED:");
+    console.error(error);
+
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });

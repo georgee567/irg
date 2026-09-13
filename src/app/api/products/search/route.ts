@@ -31,7 +31,7 @@ export async function GET(request: Request) {
             },
           },
           {
-            category: {
+            Category: {
               name: {
                 contains: query,
                 mode: "insensitive",
@@ -41,8 +41,8 @@ export async function GET(request: Request) {
         ],
       },
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
       orderBy: {
         createdAt: "desc",

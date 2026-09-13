@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -62,7 +63,9 @@ export async function POST(request: Request) {
     // Store payment record
     await prisma.payment.create({
       data: {
-        orderId,
+        id: crypto.randomUUID(),
+        updatedAt: new Date(),
+        Order: { connect: { id: orderId } },
         provider: "PayPal",
         method: "paypal",
         amount: order.total,

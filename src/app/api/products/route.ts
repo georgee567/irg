@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -9,8 +10,8 @@ export async function GET() {
   try {
     const products = await prisma.product.findMany({
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -188,18 +189,25 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create product and variants in one transaction
+    // Create product and variants
     const product = await prisma.product.create({
       data: {
+        id: crypto.randomUUID(),
+        updatedAt: new Date(),
         name,
         slug,
         description,
         price: productPrice,
         images,
         featured: Boolean(featured),
-        categoryId,
 
-        variants: {
+        Category: {
+          connect: {
+            id: categoryId,
+          },
+        },
+
+        ProductVariant: {
           create: variants.map(
             (variant: {
               size: string;
@@ -207,18 +215,20 @@ export async function POST(request: Request) {
               price: number | string;
               stock?: number;
             }) => ({
+              id: crypto.randomUUID(),
               size: variant.size,
               color: variant.color,
               price: Number(variant.price),
               stock: Number(variant.stock ?? 0),
+              updatedAt: new Date(),
             })
           ),
         },
       },
 
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
     });
 

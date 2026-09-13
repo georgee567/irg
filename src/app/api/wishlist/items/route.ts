@@ -31,8 +31,8 @@ export async function POST(request: Request) {
         id: productId,
       },
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
     });
 
@@ -52,7 +52,9 @@ export async function POST(request: Request) {
     if (!wishlist) {
       wishlist = await prisma.wishlist.create({
         data: {
+          id: crypto.randomUUID(),
           userId: user.id,
+          updatedAt: new Date(),
         },
       });
     }
@@ -78,14 +80,15 @@ export async function POST(request: Request) {
 
     const item = await prisma.wishlistItem.create({
       data: {
+        id: crypto.randomUUID(),
         wishlistId: wishlist.id,
         productId,
       },
       include: {
-        product: {
+        Product: {
           include: {
-            category: true,
-            variants: true,
+            Category: true,
+            ProductVariant: true,
           },
         },
       },
@@ -96,7 +99,7 @@ export async function POST(request: Request) {
         message: "Product added to wishlist.",
         item: {
           ...item,
-          product: serializeProduct(item.product),
+          product: serializeProduct(item.Product),
         },
       },
       { status: 201 }

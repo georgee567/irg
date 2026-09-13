@@ -10,7 +10,7 @@ export async function GET() {
       include: {
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -80,8 +80,10 @@ export async function POST(request: Request) {
 
     const category = await prisma.category.create({
       data: {
+        id: crypto.randomUUID(),
         name,
         slug,
+        updatedAt: new Date(),
       },
     });
 

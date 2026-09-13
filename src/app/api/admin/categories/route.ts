@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -24,11 +25,11 @@ export async function GET() {
 
     const categories = await prisma.category.findMany({
       include: {
-        _count: {
-          select: {
-            products: true,
-          },
-        },
+       _count: {
+  select: {
+    Product: true,
+  },
+},
       },
       orderBy: {
         name: "asc",
@@ -93,8 +94,10 @@ export async function POST(request: Request) {
 
     const category = await prisma.category.create({
       data: {
+        id: crypto.randomUUID(),
         name: name.trim(),
         slug: slug.trim(),
+        updatedAt: new Date(),
       },
     });
 

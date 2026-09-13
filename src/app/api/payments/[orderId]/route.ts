@@ -30,7 +30,7 @@ export async function GET(
         paymentStatus: true,
         total: true,
         createdAt: true,
-        payments: {
+        Payment: {
           select: {
             id: true,
             provider: true,
@@ -61,7 +61,7 @@ export async function GET(
       orderStatus: order.status,
       paymentStatus: order.paymentStatus,
       total: order.total,
-      payments: order.payments,
+      payments: order.Payment,
     });
   } catch (error) {
     console.error(

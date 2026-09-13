@@ -34,10 +34,10 @@ export async function GET(
         userId: user.id,
       },
       include: {
-        items: {
+        OrderItem: {
           include: {
-            product: true,
-            variant: true,
+            Product: true,
+            ProductVariant: true,
           },
         },
       },
@@ -124,7 +124,7 @@ const status = statusValue as OrderStatus;
         status,
       },
       include: {
-        items: true,
+        OrderItem: true,
       },
     });
 

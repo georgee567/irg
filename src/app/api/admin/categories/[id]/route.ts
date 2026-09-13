@@ -77,7 +77,7 @@ export async function DELETE(
       include: {
         _count: {
           select: {
-            products: true,
+            Product: true,
           },
         },
       },
@@ -90,7 +90,7 @@ export async function DELETE(
       );
     }
 
-    if (category._count.products > 0) {
+    if (category._count.Product > 0) {
       return NextResponse.json(
         {
           error:

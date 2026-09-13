@@ -17,8 +17,8 @@ export async function GET(
     const product = await prisma.product.findUnique({
       where: { id },
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
     });
 
@@ -148,8 +148,8 @@ export async function PATCH(
       },
 
       include: {
-        category: true,
-        variants: true,
+        Category: true,
+        ProductVariant: true,
       },
     });
 

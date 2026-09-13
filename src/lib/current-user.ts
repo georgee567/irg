@@ -20,7 +20,7 @@ export async function getCurrentUser() {
       token,
     },
     include: {
-      user: true,
+      User: true,
     },
   });
 
@@ -38,7 +38,7 @@ export async function getCurrentUser() {
     return null;
   }
 
-  return session.user;
+  return session.User;
 }
 
 export { SESSION_COOKIE };

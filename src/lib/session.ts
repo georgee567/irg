@@ -22,6 +22,7 @@ export async function createSession(
 
   const session = await prisma.session.create({
     data: {
+      id: crypto.randomUUID(),
       token,
       userId,
       expiresAt,

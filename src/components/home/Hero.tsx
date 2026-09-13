@@ -10,7 +10,7 @@ export default function Hero() {
       {/* Background */}
 
       <Image
-        src="/images/hero-model.jpeg"
+        src="/images/hero-model.png"
         alt="IRG Hero"
         fill
         priority

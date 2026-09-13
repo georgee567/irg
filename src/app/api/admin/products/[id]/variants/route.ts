@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -107,6 +108,8 @@ export async function POST(
 
     const variant = await prisma.productVariant.create({
       data: {
+        id: randomUUID(),
+        updatedAt: new Date(),
         productId,
         size: size.trim(),
         color: color.trim(),

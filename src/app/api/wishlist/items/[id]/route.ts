@@ -24,7 +24,7 @@ export async function DELETE(
     const item = await prisma.wishlistItem.findFirst({
       where: {
         id,
-        wishlist: {
+        Wishlist: {
           userId: user.id,
         },
       },

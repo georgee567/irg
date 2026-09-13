@@ -10,8 +10,15 @@ export async function PATCH(
   try {
     const { user: admin, response } = await requireAdmin();
 
-    if (response || !admin) {
+    if (response) {
       return response;
+    }
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: "Admin authentication required." },
+        { status: 401 }
+      );
     }
 
     const { id } = await context.params;
@@ -28,18 +35,13 @@ export async function PATCH(
 
     if (id === admin.id && role !== "ADMIN") {
       return NextResponse.json(
-        {
-          error:
-            "You cannot remove your own admin role.",
-        },
+        { error: "You cannot remove your own admin role." },
         { status: 400 }
       );
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: {
-        id,
-      },
+      where: { id },
     });
 
     if (!existingUser) {
@@ -50,12 +52,8 @@ export async function PATCH(
     }
 
     const updatedUser = await prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        role,
-      },
+      where: { id },
+      data: { role },
       select: {
         id: true,
         name: true,

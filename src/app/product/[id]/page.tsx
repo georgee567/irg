@@ -22,8 +22,8 @@ export default async function ProductPage({
   const product = await prisma.product.findUnique({
     where: { id },
     include: {
-      category: true,
-      variants: true,
+      Category: true,
+      ProductVariant: true,
     },
   });
 
@@ -35,11 +35,11 @@ export default async function ProductPage({
     ...product,
     price: Number(product.price),
     category: {
-      ...product.category,
-      createdAt: product.category.createdAt.toISOString(),
-      updatedAt: product.category.updatedAt.toISOString(),
+      ...product.Category,
+      createdAt: product.Category.createdAt.toISOString(),
+      updatedAt: product.Category.updatedAt.toISOString(),
     },
-    variants: product.variants.map((variant) => ({
+    variants: product.ProductVariant.map((variant) => ({
       ...variant,
       price: Number(variant.price),
       createdAt: variant.createdAt.toISOString(),

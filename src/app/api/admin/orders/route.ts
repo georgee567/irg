@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 
@@ -52,11 +53,11 @@ export async function POST(request: Request) {
         userId: user.id,
       },
       include: {
-        items: {
+        CartItem: {
           include: {
-            variant: {
+            ProductVariant: {
               include: {
-                product: true,
+                Product: true,
               },
             },
           },
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!cart || cart.items.length === 0) {
+    if (!cart || cart.CartItem.length === 0) {
       return NextResponse.json(
         { error: "Your cart is empty." },
         { status: 400 }
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const variantIds = cart.items.map(
+      const variantIds = cart.CartItem.map(
         (item) => item.variantId
       );
 
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
           },
         },
         include: {
-          product: true,
+          Product: true,
         },
       });
 
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
 
       const orderItems = [];
 
-      for (const cartItem of cart.items) {
+      for (const cartItem of cart.CartItem) {
         const variant = variantMap.get(
           cartItem.variantId
         );
@@ -111,7 +112,7 @@ export async function POST(request: Request) {
 
         if (cartItem.quantity > variant.stock) {
           throw new Error(
-            `Insufficient stock for ${variant.product.name} (${variant.size}, ${variant.color}).`
+            `Insufficient stock for ${variant.Product.name} (${variant.size}, ${variant.color}).`
           );
         }
 
@@ -124,9 +125,18 @@ export async function POST(request: Request) {
         subtotal = subtotal.add(lineTotal);
 
         orderItems.push({
-          productId: variant.productId,
-          variantId: variant.id,
-          productName: variant.product.name,
+          id: crypto.randomUUID(),
+          Product: {
+            connect: {
+              id: variant.productId,
+            },
+          },
+          ProductVariant: {
+            connect: {
+              id: variant.id,
+            },
+          },
+          productName: variant.Product.name,
           size: variant.size,
           color: variant.color,
           unitPrice,
@@ -140,6 +150,7 @@ export async function POST(request: Request) {
 
       const order = await tx.order.create({
         data: {
+          id: crypto.randomUUID(),
           userId: user.id,
 
           status: "PENDING",
@@ -168,28 +179,31 @@ export async function POST(request: Request) {
           shippingCountry:
             body.shippingCountry!.trim(),
 
-          items: {
+          updatedAt: new Date(),
+          OrderItem: {
             create: orderItems,
           },
 
-          payments: {
+          Payment: {
             create: {
+              id: crypto.randomUUID(),
               provider: "PENDING",
               method: "UNSELECTED",
               amount: total,
               currency: "KES",
               status: "PENDING",
+              updatedAt: new Date(),
             },
           },
         },
 
         include: {
-          items: true,
-          payments: true,
+          OrderItem: true,
+          Payment: true,
         },
       });
 
-      for (const cartItem of cart.items) {
+      for (const cartItem of cart.CartItem) {
         const updated =
           await tx.productVariant.updateMany({
             where: {
@@ -243,3 +257,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
+
+
+

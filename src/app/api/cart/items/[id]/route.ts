@@ -32,12 +32,12 @@ export async function PATCH(
     const cartItem = await prisma.cartItem.findFirst({
       where: {
         id,
-        cart: {
+        Cart: {
           userId: user.id,
         },
       },
       include: {
-        variant: true,
+        ProductVariant: true,
       },
     });
 
@@ -48,10 +48,10 @@ export async function PATCH(
       );
     }
 
-    if (quantity > cartItem.variant.stock) {
+    if (quantity > cartItem.ProductVariant.stock) {
       return NextResponse.json(
         {
-          error: `Only ${cartItem.variant.stock} item(s) are available in stock.`,
+          error: `Only ${cartItem.ProductVariant.stock} item(s) are available in stock.`,
         },
         { status: 409 }
       );
@@ -65,9 +65,9 @@ export async function PATCH(
         quantity,
       },
       include: {
-        variant: {
+        ProductVariant: {
           include: {
-            product: true,
+            Product: true,
           },
         },
       },
@@ -107,7 +107,7 @@ export async function DELETE(
     const cartItem = await prisma.cartItem.findFirst({
       where: {
         id,
-        cart: {
+        Cart: {
           userId: user.id,
         },
       },

@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -16,7 +17,7 @@ export async function GET() {
 
     const payments = await prisma.payment.findMany({
       where: {
-        order: {
+      Order: {
           userId: user.id,
         },
       },
@@ -139,10 +140,11 @@ export async function POST(request: Request) {
         })
       : await prisma.payment.create({
           data: {
-            orderId,
-            provider,
-            method,
-            amount: order.total,
+          id: crypto.randomUUID(),
+          updatedAt: new Date(),
+              Order: { connect: { id: orderId } },
+    provider,
+    method,            amount: order.total,
             currency: "KES",
             status: "PENDING",
           },

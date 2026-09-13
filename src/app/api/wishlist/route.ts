@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
@@ -21,12 +22,12 @@ export async function GET() {
         userId: user.id,
       },
       include: {
-        items: {
+        WishlistItem: {
           include: {
-            product: {
+            Product: {
               include: {
-                category: true,
-                variants: true,
+                Category: true,
+                ProductVariant: true,
               },
             },
           },
@@ -37,15 +38,17 @@ export async function GET() {
     if (!wishlist) {
       wishlist = await prisma.wishlist.create({
         data: {
+          id: crypto.randomUUID(),
           userId: user.id,
+          updatedAt: new Date(),
         },
         include: {
-          items: {
+          WishlistItem: {
             include: {
-              product: {
+              Product: {
                 include: {
-                  category: true,
-                  variants: true,
+                  Category: true,
+                  ProductVariant: true,
                 },
               },
             },
@@ -57,12 +60,12 @@ export async function GET() {
     return NextResponse.json({
       wishlist: {
         ...wishlist,
-        items: wishlist.items.map(item => ({
+        items: wishlist.WishlistItem.map(item => ({
           ...item,
-          product: serializeProduct(item.product),
+          product: serializeProduct(item.Product),
         })),
       },
-      itemCount: wishlist.items.length,
+      itemCount: wishlist.WishlistItem.length,
     });
   } catch (error) {
     console.error("Get wishlist error:", error);
