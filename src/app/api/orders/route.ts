@@ -30,7 +30,19 @@ export async function GET() {
       },
       include: {
         OrderItem: true,
-        Payment: true,
+        Payment: {
+          select: {
+            id: true,
+            provider: true,
+            method: true,
+            transactionReference: true,
+            amount: true,
+            currency: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",

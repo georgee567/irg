@@ -9,10 +9,16 @@ import { Order } from "@/types/models";
 export default function OrdersPage() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+
     async function loadOrders() {
+      setLoading(true);
+
       try {
         const response = await fetch("/api/orders", {
           method: "GET",
@@ -22,27 +28,27 @@ export default function OrdersPage() {
 
         if (!response.ok) {
           if (response.status === 401) {
-            setOrders([]);
+            if (active) setOrders([]);
             return;
           }
           throw new Error("Unable to load orders.");
         }
 
         const data = await response.json();
-        setOrders(data.orders ?? []);
+        if (active) setOrders(data.orders ?? []);
       } catch (error) {
         console.error("Load orders error:", error);
-        setOrders([]);
+        if (active) setOrders([]);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     }
 
-    if (user) {
-      loadOrders();
-    } else {
-      setLoading(false);
-    }
+    void loadOrders();
+
+    return () => {
+      active = false;
+    };
   }, [user]);
 
   if (!user) {

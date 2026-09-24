@@ -1,6 +1,11 @@
 "use client";
 
-export default function MpesaForm() {
+interface Props {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function MpesaForm({ value, onChange }: Props) {
   return (
     <div className="mt-8 rounded-2xl border border-[#222] bg-[#090909] p-6">
 
@@ -10,6 +15,8 @@ export default function MpesaForm() {
 
       <input
         type="tel"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="2547XXXXXXXX"
         className="w-full rounded-xl border border-[#222] bg-black p-4 outline-none"
       />

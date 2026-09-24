@@ -119,7 +119,7 @@ export default function FeaturedProducts() {
                     }}
                     className="w-full rounded-md border border-[#D4AF37] py-3 uppercase tracking-[0.25em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {variant ? "Add To Cart" : "Out Of Stock"}
+                    {variant ? "Add To Cart" : "Sold Out"}
                   </button>
                 </div>
               </div>

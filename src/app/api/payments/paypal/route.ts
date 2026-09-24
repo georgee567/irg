@@ -1,11 +1,13 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import {
   createPayPalOrder,
   capturePayPalOrder,
+  getPayPalAmount,
 } from "@/lib/paypal";
 
 /**
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
         Order: { connect: { id: orderId } },
         provider: "PayPal",
         method: "paypal",
-        amount: order.total,
+        amount: getPayPalAmount(order.total),
         currency: "USD",
         status: "PENDING",
         transactionReference: paypalOrder.id,
@@ -160,8 +162,13 @@ export async function GET(request: Request) {
       );
     }
 
+    const capture = captureResult.purchase_units?.[0]?.payments?.captures?.[0];
+    if (!capture || capture.amount.currency_code !== "USD" || !new Prisma.Decimal(capture.amount.value).eq(getPayPalAmount(order.total))) {
+      return NextResponse.json({ error: "PayPal capture amount or currency did not match the order." }, { status: 400 });
+    }
+
     // Update payment status
-    await prisma.payment.updateMany({
+    const paymentUpdate = await prisma.payment.updateMany({
       where: {
         orderId: referenceId,
         transactionReference: token,
@@ -169,9 +176,12 @@ export async function GET(request: Request) {
       data: {
         status: "PAID",
         transactionReference: transactionId,
-        providerResponse: captureResult as any,
+        providerResponse: JSON.parse(JSON.stringify(captureResult)) as Prisma.InputJsonValue,
       },
     });
+    if (paymentUpdate.count !== 1) {
+      return NextResponse.json({ error: "No pending PayPal payment found for this order." }, { status: 409 });
+    }
 
     // Update order payment status
     await prisma.order.update({

@@ -17,6 +17,9 @@ export async function GET() {
       categories,
       orders,
       paidOrders,
+      lowStock,
+      outOfStock,
+      recentOrders,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.product.count(),
@@ -29,6 +32,13 @@ export async function GET() {
         select: {
           total: true,
         },
+      }),
+      prisma.productVariant.count({ where: { stock: { gt: 0, lte: 5 } } }),
+      prisma.productVariant.count({ where: { stock: 0 } }),
+      prisma.order.findMany({
+        take: 8,
+        orderBy: { createdAt: "desc" },
+        select: { id: true, total: true, status: true, paymentStatus: true, createdAt: true, shippingName: true },
       }),
     ]);
 
@@ -44,7 +54,10 @@ export async function GET() {
         categories,
         orders,
         revenue,
+        lowStock,
+        outOfStock,
       },
+      recentOrders: recentOrders.map((order) => ({ ...order, total: Number(order.total) })),
     });
   } catch (error) {
     console.error("Admin dashboard error:", error);

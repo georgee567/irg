@@ -21,7 +21,7 @@ export default function ProductManager() {
   const [error, setError] = useState("");
 
   async function load() {
-    const [productResponse, categoryResponse] = await Promise.all([fetch("/api/admin/products"), fetch("/api/categories")]);
+    const [productResponse, categoryResponse] = await Promise.all([fetch("/api/admin/products"), fetch("/api/admin/categories")]);
     if (!productResponse.ok) throw new Error((await productResponse.json()).error || "Admin access required.");
     const productData = await productResponse.json();
     const categoryData = await categoryResponse.json();
@@ -30,7 +30,15 @@ export default function ProductManager() {
   }
 
   useEffect(() => {
-    if (!loading && user?.role === "ADMIN") load().catch((reason) => setError(reason instanceof Error ? reason.message : "Unable to load products."));
+    if (!loading && user?.role === "ADMIN") {
+      void (async () => {
+        try {
+          await load();
+        } catch (reason) {
+          setError(reason instanceof Error ? reason.message : "Unable to load products.");
+        }
+      })();
+    }
   }, [loading, user]);
 
   function startNew() {
@@ -51,6 +59,17 @@ export default function ProductManager() {
 
   function updateVariant(index: number, field: keyof Variant, value: string) {
     setVariants((current) => current.map((variant, variantIndex) => variantIndex === index ? { ...variant, [field]: value } : variant));
+  }
+
+  async function uploadImages(files: FileList | null) {
+    if (!files?.length) return;
+    setError("");
+    const formData = new FormData();
+    Array.from(files).forEach((file) => formData.append("files", file));
+    const response = await fetch("/api/admin/uploads", { method: "POST", body: formData });
+    const data = await response.json();
+    if (!response.ok) return setError(data.error || "Unable to upload images.");
+    setForm((current) => ({ ...current, images: [...current.images.filter(Boolean), ...data.urls] }));
   }
 
   async function submit(event: FormEvent) {
@@ -84,7 +103,7 @@ export default function ProductManager() {
       <p className="mt-4 max-w-2xl text-gray-400">Use local image paths such as <strong className="text-white">/images/products/shirt-01.png</strong>. Place the file in <strong className="text-white">public/images/products/</strong> first.</p>
       {message && <p className="mt-6 text-[#D4AF37]">{message}</p>}{error && <p className="mt-6 text-red-400">{error}</p>}
       <form onSubmit={submit} className="mt-10 space-y-6 rounded-[24px] border border-[#222] bg-[#090909] p-8"><h2 className="font-serif text-3xl">{editing ? "Edit product" : "Add product"}</h2><div className="grid gap-5 md:grid-cols-2">{([["name", "Product name"], ["slug", "Product slug"], ["price", "Price (KES)"]] as const).map(([field, label]) => <label key={field} className="space-y-2 text-sm text-gray-400">{label}<input required value={form[field]} onChange={(event) => setForm({ ...form, [field]: event.target.value })} className="w-full rounded-lg border border-[#333] bg-black px-4 py-3 text-white" /></label>)}<label className="space-y-2 text-sm text-gray-400">Category<select required value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value })} className="w-full rounded-lg border border-[#333] bg-black px-4 py-3 text-white">{categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label></div><label className="block space-y-2 text-sm text-gray-400">Description<textarea required value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="min-h-28 w-full rounded-lg border border-[#333] bg-black px-4 py-3 text-white" /></label><label className="flex items-center gap-3 text-sm text-gray-300"><input type="checkbox" checked={form.featured} onChange={(event) => setForm({ ...form, featured: event.target.checked })} /> Featured product</label>
-        <div><p className="mb-2 text-sm text-gray-400">Image paths</p>{form.images.map((image, index) => <div className="mb-2 flex gap-2" key={index}><input value={image} onChange={(event) => setForm({ ...form, images: form.images.map((current, currentIndex) => currentIndex === index ? event.target.value : current) })} placeholder="/images/products/shirt-01.png" className="w-full rounded-lg border border-[#333] bg-black px-4 py-3 text-white" />{form.images.length > 1 && <button type="button" onClick={() => setForm({ ...form, images: form.images.filter((_, currentIndex) => currentIndex !== index) })} className="px-3 text-red-400">Remove</button>}</div>)}<button type="button" onClick={() => setForm({ ...form, images: [...form.images, ""] })} className="text-sm text-[#D4AF37]">+ Add image path</button></div>
+        <div><p className="mb-2 text-sm text-gray-400">Product images</p><input aria-label="Upload product images" type="file" accept="image/jpeg,image/png,image/webp,image/avif" multiple onChange={(event) => uploadImages(event.target.files)} className="mb-4 block text-sm text-gray-300" /><p className="mb-3 text-xs text-gray-500">JPEG, PNG, WebP, or AVIF; maximum 5 MB per image. Existing local image paths remain supported.</p>{form.images.map((image, index) => <div className="mb-3 flex items-center gap-3" key={image || index}>{image ? <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded border border-[#333]"><Image src={image} alt="Product preview" fill className="object-cover" sizes="64px" /></div> : null}<input value={image} onChange={(event) => setForm({ ...form, images: form.images.map((current, currentIndex) => currentIndex === index ? event.target.value : current) })} placeholder="/images/products/shirt-01.png or uploaded URL" className="w-full rounded-lg border border-[#333] bg-black px-4 py-3 text-white" />{form.images.length > 1 && <button type="button" onClick={() => setForm({ ...form, images: form.images.filter((_, currentIndex) => currentIndex !== index) })} className="px-3 text-red-400">Remove</button>}</div>)}<button type="button" onClick={() => setForm({ ...form, images: [...form.images, ""] })} className="text-sm text-[#D4AF37]">+ Add image URL</button></div>
         <div><p className="mb-2 text-sm text-gray-400">Variants</p>{variants.map((variant, index) => <div className="mb-2 grid gap-2 md:grid-cols-4" key={index}>{(["size", "color", "price", "stock"] as const).map((field) => <input key={field} required placeholder={field[0].toUpperCase() + field.slice(1)} value={variant[field]} onChange={(event) => updateVariant(index, field, event.target.value)} className="rounded-lg border border-[#333] bg-black px-4 py-3 text-white" />)}</div>)}<button type="button" onClick={() => setVariants([...variants, blankVariant()])} className="text-sm text-[#D4AF37]">+ Add variant</button></div>
         <button type="submit" className="rounded-xl bg-[#D4AF37] px-8 py-3 font-semibold text-black">{editing ? "Save changes" : "Create product"}</button>
       </form>

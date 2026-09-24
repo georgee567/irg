@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { initiateMpesaStkPush } from "@/lib/mpesa";
@@ -66,29 +67,42 @@ export async function POST(request: Request) {
       orderId
     );
 
-    // Store payment record
-    const payment = await prisma.payment.create({
-      data: {
-    id: crypto.randomUUID(),
-    updatedAt: new Date(),
-    Order: { connect: { id: orderId } },
-    provider: "M-Pesa",
-        method: "mpesa",
-        amount: order.total,
-        currency: "KES",
-        status: "PENDING",
-        transactionReference: stkPush.checkoutRequestId,
-        providerResponse: {
-          merchantRequestId: stkPush.merchantRequestId,
-          checkoutRequestId: stkPush.checkoutRequestId,
-        } as any,
-      },
+    const providerResponse = {
+      merchantRequestId: stkPush.merchantRequestId,
+      checkoutRequestId: stkPush.checkoutRequestId,
+    } as Prisma.InputJsonValue;
+    const existingPayment = await prisma.payment.findFirst({
+      where: { orderId, provider: "M-Pesa", status: "PENDING" },
+      orderBy: { createdAt: "desc" },
     });
+    const payment = existingPayment
+      ? await prisma.payment.update({
+          where: { id: existingPayment.id },
+          data: { transactionReference: stkPush.checkoutRequestId, providerResponse },
+        })
+      : await prisma.payment.create({
+          data: {
+            id: crypto.randomUUID(),
+            updatedAt: new Date(),
+            orderId,
+            provider: "M-Pesa",
+            method: "mpesa",
+            amount: order.total,
+            currency: "KES",
+            status: "PENDING",
+            transactionReference: stkPush.checkoutRequestId,
+            providerResponse,
+          },
+        });
 
     return NextResponse.json({
       success: true,
       message: "STK Push sent. Please enter your M-Pesa PIN.",
-      payment,
+      payment: {
+        id: payment.id,
+        status: payment.status,
+        transactionReference: payment.transactionReference,
+      },
       checkoutRequestId: stkPush.checkoutRequestId,
     });
   } catch (error) {

@@ -10,12 +10,7 @@ export default function PaymentMethods({
   setPayment,
 }: Props) {
 
-  const methods = [
-    "M-Pesa",
-    "PayPal",
-    "Visa",
-    "Mastercard",
-  ];
+  const methods = ["M-Pesa"];
 
   return (
 
@@ -48,9 +43,7 @@ export default function PaymentMethods({
 
       </div>
 
-      <p className="mt-4 text-sm text-gray-400">
-        Supported options are prepared for the live provider flow: M-Pesa and PayPal can be connected with credentials, while the card methods remain ready for checkout integration.
-      </p>
+      <p className="mt-4 text-sm text-gray-400">M-Pesa payments are verified by the server callback before an order is marked paid.</p>
 
     </div>
 

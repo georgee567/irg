@@ -48,6 +48,14 @@ function getPayPalApi() {
   return mode === "production" ? PAYPAL_API_PRODUCTION : PAYPAL_API_SANDBOX;
 }
 
+export function getPayPalAmount(amount: Prisma.Decimal | string | number) {
+  const rate = process.env.PAYPAL_KES_TO_USD_RATE;
+  if (!rate) throw new Error("PAYPAL_KES_TO_USD_RATE is not configured.");
+  const conversionRate = new Prisma.Decimal(rate);
+  if (conversionRate.lte(0)) throw new Error("PAYPAL_KES_TO_USD_RATE must be greater than zero.");
+  return new Prisma.Decimal(amount).mul(conversionRate).toDecimalPlaces(2);
+}
+
 /**
  * Get PayPal access token using client credentials
  */
@@ -87,7 +95,7 @@ export async function createPayPalOrder(
   orderId: string
 ) {
   const accessToken = await getPayPalAccessToken();
-  const amountValue = new Prisma.Decimal(amount).toFixed(2);
+  const amountValue = getPayPalAmount(amount).toFixed(2);
 
   const response = await fetch(`${getPayPalApi()}/v2/checkout/orders`, {
     method: "POST",

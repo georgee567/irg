@@ -27,6 +27,20 @@ const timestamps = () => ({
 });
 
 async function main() {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_SEED !== "true") {
+    throw new Error("Refusing to run the demo seed in production. Set ALLOW_DEMO_SEED=true only for an intentional, reviewed seed operation.");
+  }
+
+  const existingData = await Promise.all([
+    prisma.user.count(),
+    prisma.product.count(),
+    prisma.order.count(),
+  ]);
+
+  if (existingData.some((count) => count > 0) && process.env.ALLOW_DEMO_SEED !== "true") {
+    throw new Error("Refusing to seed a populated database. Existing business data was left unchanged.");
+  }
+
   console.log("🌱 Starting database seed...");
 
   // ==========================================
@@ -65,7 +79,7 @@ async function main() {
     },
   });
 
-  const womenCategory = await prisma.category.create({
+  await prisma.category.create({
     data: {
       ...timestamps(),
       name: "Women",

@@ -104,16 +104,12 @@ async function seed() {
   // Create cart for customer
   await prisma.cart.create({
     data: {
-      id: crypto.randomUUID(),
       userId: customerUser.id,
-      updatedAt: new Date(),
     },
   });
   await prisma.wishlist.create({
     data: {
-      id: crypto.randomUUID(),
       userId: customerUser.id,
-      updatedAt: new Date(),
     },
   });
 

@@ -21,7 +21,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/account");
+      router.replace(user.role === "ADMIN" ? "/admin" : "/account");
     }
   }, [loading, router, user]);
 
@@ -42,9 +42,11 @@ export default function LoginPage() {
     try {
       setSubmitting(true);
 
-      await login(email, password);
+      const loggedInUser = await login(email, password);
 
-      router.replace("/account");
+      router.replace(
+        loggedInUser.role === "ADMIN" ? "/admin" : "/account"
+      );
     } catch (error) {
       setError(
         error instanceof Error
@@ -56,10 +58,8 @@ export default function LoginPage() {
     }
   }
 
-  const handleSocialSignIn = (provider: string) => {
-    console.info(
-      `${provider} social sign-in is ready for configuration once OAuth credentials are added.`
-    );
+  const handleSocialSignIn = (provider: "google" | "facebook") => {
+    window.location.assign(`/api/auth/oauth/${provider}`);
   };
 
   return (
@@ -84,16 +84,16 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => handleSocialSignIn("Google")}
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+            onClick={() => handleSocialSignIn("google")}
+            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37]"
           >
             Continue with Google
           </button>
 
           <button
             type="button"
-            onClick={() => handleSocialSignIn("Facebook")}
-            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
+            onClick={() => handleSocialSignIn("facebook")}
+            className="w-full rounded-xl border border-[#333] bg-[#111] px-5 py-3 text-sm font-medium text-white transition hover:border-[#D4AF37]"
           >
             Continue with Facebook
           </button>
@@ -141,10 +141,6 @@ export default function LoginPage() {
             {submitting ? "Logging in..." : "Login"}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-xs text-gray-500">
-          Social sign-in is ready for OAuth credentials once configured.
-        </p>
 
         <p className="mt-8 text-center text-gray-400">
           Don&apos;t have an account?{" "}

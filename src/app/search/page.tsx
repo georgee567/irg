@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,13 +34,13 @@ export default function SearchPage() {
   const { addToCart } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadProducts() {
+      setLoading(true);
+
       try {
-        setLoading(true);
         const response = await fetch("/api/products", {
           cache: "no-store",
         });
@@ -58,26 +58,22 @@ export default function SearchPage() {
       }
     }
 
-    loadProducts();
+    void loadProducts();
   }, []);
 
-  // Filter products based on search query
-  useEffect(() => {
+  const filteredProducts = useMemo(() => {
     if (!search.trim()) {
-      setFilteredProducts([]);
-      return;
+      return [] as Product[];
     }
 
     const query = search.toLowerCase().trim();
-    const results = products.filter((product) => {
+    return products.filter((product) => {
       const matchesName = product.name.toLowerCase().includes(query);
       const matchesDescription = product.description.toLowerCase().includes(query);
       const matchesCategory = product.category.name.toLowerCase().includes(query);
 
       return matchesName || matchesDescription || matchesCategory;
     });
-
-    setFilteredProducts(results);
   }, [search, products]);
 
   return (

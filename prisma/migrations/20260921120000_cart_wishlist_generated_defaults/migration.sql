@@ -1,0 +1,3 @@
+-- Prisma generates `uuid()` values in the client and maintains `@updatedAt`
+-- values on writes. No database data or constraints need to change for these
+-- two lifecycle defaults, so this migration is intentionally data-safe.

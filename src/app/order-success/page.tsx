@@ -47,7 +47,11 @@ function OrderSuccessContent() {
     <main className="flex min-h-screen items-center justify-center bg-black px-8 py-24 text-white">
       <div className="max-w-2xl rounded-[32px] border border-[#222] bg-[#090909] p-10 text-center">
         <h1 className="font-serif text-6xl text-[#D4AF37]">Thank You</h1>
-        <p className="mt-6 text-xl text-gray-400">Your order has been placed successfully.</p>
+        <p className="mt-6 text-xl text-gray-400">
+          {order?.paymentStatus === "PAID"
+            ? "Your payment has been confirmed and your order is being processed."
+            : "Your order is awaiting payment confirmation. Check your phone to complete the M-Pesa request."}
+        </p>
 
         {loading ? (
           <p className="mt-8 text-gray-400">Loading order details...</p>

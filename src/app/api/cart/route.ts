@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import crypto from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
@@ -42,9 +41,7 @@ export async function GET() {
     if (!cart) {
       cart = await prisma.cart.create({
         data: {
-          id: crypto.randomUUID(),
           userId: user.id,
-          updatedAt: new Date(),
         },
         include: {
           CartItem: {

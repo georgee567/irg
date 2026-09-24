@@ -8,21 +8,21 @@ datasource db {
 }
 
 model Cart {
-  id        String     @id
+  id        String     @id @default(uuid())
   userId    String     @unique
   createdAt DateTime   @default(now())
-  updatedAt DateTime
+  updatedAt DateTime   @updatedAt
   User      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   CartItem  CartItem[]
 }
 
 model CartItem {
-  id             String         @id
+  id             String         @id @default(uuid())
   quantity       Int            @default(1)
   cartId         String
   variantId      String
   createdAt      DateTime       @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime       @updatedAt
   Cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
   ProductVariant ProductVariant @relation(fields: [variantId], references: [id])
 
@@ -30,16 +30,16 @@ model CartItem {
 }
 
 model Category {
-  id        String    @id
+  id        String    @id @default(uuid())
   name      String    @unique
   slug      String    @unique
   createdAt DateTime  @default(now())
-  updatedAt DateTime
+  updatedAt DateTime  @updatedAt
   Product   Product[]
 }
 
 model Order {
-  id              String        @id
+  id              String        @id @default(uuid())
   userId          String
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
@@ -53,14 +53,14 @@ model Order {
   shippingCity    String
   shippingCountry String
   createdAt       DateTime      @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime      @updatedAt
   User            User          @relation(fields: [userId], references: [id])
   OrderItem       OrderItem[]
   Payment         Payment[]
 }
 
 model OrderItem {
-  id             String         @id
+  id             String         @id @default(uuid())
   orderId        String
   productId      String
   variantId      String
@@ -71,13 +71,14 @@ model OrderItem {
   quantity       Int
   lineTotal      Decimal        @db.Decimal(10, 2)
   createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   Order          Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   Product        Product        @relation(fields: [productId], references: [id])
   ProductVariant ProductVariant @relation(fields: [variantId], references: [id])
 }
 
 model Payment {
-  id                   String        @id
+  id                   String        @id @default(uuid())
   orderId              String
   provider             String
   method               String
@@ -87,7 +88,7 @@ model Payment {
   status               PaymentStatus @default(PENDING)
   providerResponse     Json?
   createdAt            DateTime      @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime      @updatedAt
   Order                Order         @relation(fields: [orderId], references: [id])
 
   @@index([orderId])
@@ -95,7 +96,7 @@ model Payment {
 }
 
 model Product {
-  id             String           @id
+  id             String           @id @default(uuid())
   name           String
   slug           String           @unique
   description    String
@@ -104,7 +105,7 @@ model Product {
   featured       Boolean          @default(false)
   categoryId     String
   createdAt      DateTime         @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime         @updatedAt
   OrderItem      OrderItem[]
   Category       Category         @relation(fields: [categoryId], references: [id])
   ProductVariant ProductVariant[]
@@ -112,14 +113,14 @@ model Product {
 }
 
 model ProductVariant {
-  id        String      @id
+  id        String      @id @default(uuid())
   size      String
   color     String
   price     Decimal     @db.Decimal(10, 2)
   stock     Int         @default(0)
   productId String
   createdAt DateTime    @default(now())
-  updatedAt DateTime
+  updatedAt DateTime    @updatedAt
   CartItem  CartItem[]
   OrderItem OrderItem[]
   Product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -128,7 +129,7 @@ model ProductVariant {
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(uuid())
   token     String   @unique
   userId    String
   expiresAt DateTime
@@ -139,13 +140,13 @@ model Session {
 }
 
 model User {
-  id        String    @id
+  id        String    @id @default(uuid())
   name      String
   email     String    @unique
   password  String
   role      Role      @default(CUSTOMER)
   createdAt DateTime  @default(now())
-  updatedAt DateTime
+  updatedAt DateTime  @updatedAt
   Cart      Cart?
   Order     Order[]
   Session   Session[]
@@ -153,19 +154,20 @@ model User {
 }
 
 model Wishlist {
-  id           String         @id
+  id           String         @id @default(uuid())
   userId       String         @unique
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime       @updatedAt
   User         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   WishlistItem WishlistItem[]
 }
 
 model WishlistItem {
-  id         String   @id
+  id         String   @id @default(uuid())
   wishlistId String
   productId  String
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   Product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   Wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
 

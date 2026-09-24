@@ -7,7 +7,7 @@ import { serializeProduct } from "@/lib/serialize";
 
 type VariantInput = { size?: unknown; color?: unknown; price?: unknown; stock?: unknown };
 
-function productResponse(product: any) {
+function productResponse(product: Record<string, unknown> & { price?: unknown; Category?: unknown; category?: unknown; ProductVariant?: unknown[]; variants?: unknown[] }) {
   return serializeProduct(product);
 }
 
@@ -62,4 +62,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unable to create product." }, { status: 500 });
   }
 }
-

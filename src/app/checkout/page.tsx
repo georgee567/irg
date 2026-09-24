@@ -8,9 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 import PaymentMethods from "@/components/checkout/PaymentMethods";
-import PromoCode from "@/components/checkout/PromoCode";
 import MpesaForm from "@/components/checkout/MpesaForm";
-import CardForm from "@/components/checkout/CardForm";
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
@@ -18,7 +16,6 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const [payment, setPayment] = useState("M-Pesa");
-  const [discount, setDiscount] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -29,10 +26,8 @@ export default function CheckoutPage() {
   const [error, setError] = useState("");
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 0 ? 500 : 0;
-  const tax = subtotal * 0.16;
-  const discountAmount = subtotal * (discount / 100);
-  const total = subtotal + shipping + tax - discountAmount;
+  const shipping = 0;
+  const total = subtotal;
 
   const placeOrder = useCallback(async () => {
     if (cart.length === 0) {
@@ -76,9 +71,20 @@ export default function CheckoutPage() {
         throw new Error(data.error || "Unable to place order.");
       }
 
+      const paymentResponse = await fetch("/api/payments/mpesa", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.order.id, phoneNumber: phone }),
+      });
+      const paymentData = await paymentResponse.json();
+      if (!paymentResponse.ok) {
+        throw new Error(paymentData.error || "Unable to initiate M-Pesa payment.");
+      }
+
       await clearCart();
 
-      router.push(`/order-success?orderId=${data.order.id}`);
+      router.push(`/order-success?orderId=${data.order.id}&payment=pending`);
     } catch (error) {
       console.error("Place order error:", error);
 
@@ -90,7 +96,7 @@ export default function CheckoutPage() {
     } finally {
       setPlacing(false);
     }
-  }, [cart, clearCart, router, user, fullName, email, phone, county, city, address, payment, discount, subtotal, shipping, tax, total]);
+  }, [cart, clearCart, router, user, fullName, email, phone, county, city, address]);
 
   if (cart.length === 0) {
     return (
@@ -124,12 +130,7 @@ export default function CheckoutPage() {
             </div>
 
             <PaymentMethods payment={payment} setPayment={setPayment} />
-            {payment === "M-Pesa" ? <MpesaForm /> : null}
-            {payment === "Visa" || payment === "Mastercard" ? <CardForm /> : null}
-            <div className="mt-6 rounded-2xl border border-[#222] bg-[#090909] p-5 text-sm text-gray-400">
-              Payment methods shown here are UI placeholders for future provider integration. No live payment provider is connected yet.
-            </div>
-            <PromoCode onApply={setDiscount} />
+            <MpesaForm value={phone} onChange={setPhone} />
           </div>
 
           <div className="rounded-3xl border border-[#222] bg-[#090909] p-8">
@@ -150,8 +151,6 @@ export default function CheckoutPage() {
             <div className="mt-10 space-y-4 border-t border-[#222] pt-6">
               <div className="flex justify-between"><span>Subtotal</span><span>KSh {subtotal.toLocaleString()}</span></div>
               <div className="flex justify-between"><span>Shipping</span><span>KSh {shipping.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span>Tax</span><span>KSh {tax.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span>Discount</span><span>- KSh {discountAmount.toLocaleString()}</span></div>
               <div className="flex justify-between"><span>Payment</span><span className="text-[#D4AF37]">{payment}</span></div>
               <div className="flex justify-between border-t border-[#222] pt-5 text-2xl font-bold"><span>Total</span><span className="text-[#D4AF37]">KSh {total.toLocaleString()}</span></div>
             </div>
