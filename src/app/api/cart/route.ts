@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { serializeDecimal } from "@/lib/serialize";
+import { serializeDecimal, serializeProduct } from "@/lib/serialize";
 
 // GET /api/cart
 export async function GET() {
@@ -61,11 +61,12 @@ export async function GET() {
       });
     }
 
-    const subtotal = cart.CartItem.reduce((total, item) => {
+    const validItems = cart.CartItem.filter((item) => item.ProductVariant?.Product);
+    const subtotal = validItems.reduce((total, item) => {
       return total + serializeDecimal(item.ProductVariant.price) * item.quantity;
     }, 0);
 
-    const itemCount = cart.CartItem.reduce((total, item) => {
+    const itemCount = validItems.reduce((total, item) => {
       return total + item.quantity;
     }, 0);
 
@@ -74,11 +75,12 @@ export async function GET() {
         ...cart,
         subtotal,
         itemCount,
-        items: cart.CartItem.map(item => ({
+        items: validItems.map(item => ({
           ...item,
           variant: {
             ...item.ProductVariant,
             price: serializeDecimal(item.ProductVariant.price),
+            product: serializeProduct(item.ProductVariant.Product),
           },
         })),
       },

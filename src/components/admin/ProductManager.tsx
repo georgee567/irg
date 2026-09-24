@@ -80,8 +80,9 @@ export default function ProductManager() {
     const data = await response.json();
     if (!response.ok) { setError(data.error || "Unable to save product."); return; }
     await load();
-    setMessage(editing ? "Product updated." : "Product added.");
+    const savedMessage = editing ? "Product updated." : "Product added.";
     startNew();
+    setMessage(savedMessage);
   }
 
   async function remove(product: Product) {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     if (!wishlist) {
       wishlist = await prisma.wishlist.create({
         data: {
-          id: crypto.randomUUID(),
+          id: randomUUID(),
           userId: user.id,
           updatedAt: new Date(),
         },
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
 
     const item = await prisma.wishlistItem.create({
       data: {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         wishlistId: wishlist.id,
         productId,
       },
