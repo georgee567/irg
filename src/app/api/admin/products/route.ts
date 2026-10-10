@@ -24,7 +24,16 @@ function validateVariants(input: unknown) {
 async function readProductData(request: Request) {
   const body = await request.json();
   const { name, slug, description, price, images = [], featured = false, categoryId, variants = [] } = body;
-  if ([name, slug, description, categoryId].some((value) => typeof value !== "string" || !value.trim()) || price === undefined) return { error: "Name, slug, description, price, and category are required." };
+  const missingFields = [
+    ["name", name],
+    ["slug", slug],
+    ["description", description],
+    ["price", price],
+    ["category", categoryId],
+  ]
+    .filter(([, value]) => value === undefined || value === null || (typeof value === "string" && !value.trim()))
+    .map(([field]) => field);
+  if (missingFields.length) return { error: `Required product fields are missing: ${missingFields.join(", ")}.` };
   const numericPrice = Number(price);
   if (!Number.isFinite(numericPrice) || numericPrice < 0) return { error: "Invalid product price." };
   if (!Array.isArray(images) || images.some((image) => typeof image !== "string" || !image.trim())) return { error: "Images must be an array of paths." };
