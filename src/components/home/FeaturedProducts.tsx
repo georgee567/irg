@@ -34,12 +34,7 @@ export default function FeaturedProducts() {
 
         const data = await response.json();
 
-        setProducts(
-          (data.products ?? []).filter(
-            (product: Product & { featured?: boolean }) =>
-              product.featured
-          )
-        );
+        setProducts(data.products ?? []);
       } catch (error) {
         console.error("Load featured products error:", error);
       }
@@ -54,11 +49,11 @@ export default function FeaturedProducts() {
         <div className="mb-16 flex items-end justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-              Featured
+              Our Products
             </p>
 
             <h2 className="mt-4 font-serif text-5xl text-white">
-              IRG Signature Collection
+              IRG Collection
             </h2>
           </div>
 
