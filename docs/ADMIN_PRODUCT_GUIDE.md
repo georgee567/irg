@@ -26,3 +26,14 @@ Select **Edit** in the product table to change the name, description, price, cat
 - All products appear in the homepage collection, newest first.
 - Change the `stock` value on the relevant size/color variant and save.
 - Select **Delete**, then confirm. Products already referenced by an order are protected from deletion.
+
+## Edit public website content
+
+1. Sign in with an ADMIN account and open **Site Content** in the admin navigation (`/admin/content`).
+2. Choose Home, About, Contact, Journal, Lookbook, Custom, Footer, or Header and edit the fields shown.
+3. To replace an image or add a video, upload it in the media panel, copy its URL, and paste that URL into the matching image, video, or media URL field. The home hero supports both an image and an optional video; About, Contact, Journal, Lookbook, and Custom pages also have optional media fields.
+4. Select **Save Changes** to publish the selected page's content. Select **Load Defaults** and save to restore the original text and assets.
+
+Content is stored in the site database. Media uploads use Vercel Blob and support JPEG, PNG, WebP, AVIF, MP4, WebM, and MOV files up to 100 MB.
+
+The build command applies checked-in Prisma migrations to the database configured for that deployment before building the app. Confirm the `DATABASE_URL` deployment setting points to the intended environment; the local development database and Vercel production database are separate.

@@ -1,21 +1,12 @@
 "use client";
 
-const reviews = [
-  {
-    name: "Brian M.",
-    text: "Best luxury streetwear brand I've worn.",
-  },
-  {
-    name: "Michelle A.",
-    text: "Premium quality and amazing customer service.",
-  },
-  {
-    name: "Kevin O.",
-    text: "Every piece feels exclusive.",
-  },
-];
+import type { SiteContent } from "@/lib/site-content";
 
-export default function Testimonials() {
+export default function Testimonials({ content }: { content: SiteContent }) {
+  const reviews = ["One", "Two", "Three"].map((number) => ({
+    name: content[`testimonial${number}Name`],
+    text: content[`testimonial${number}Text`],
+  }));
   return (
     <section className="bg-[#050505] py-28">
 
@@ -24,11 +15,11 @@ export default function Testimonials() {
         <div className="mb-16 text-center">
 
           <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            Testimonials
+            {content.testimonialsEyebrow}
           </p>
 
           <h2 className="mt-4 font-serif text-5xl text-white">
-            Loved By Our Community
+            {content.testimonialsTitle}
           </h2>
 
         </div>

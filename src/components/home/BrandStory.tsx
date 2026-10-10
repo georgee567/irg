@@ -1,6 +1,8 @@
 "use client";
 
-export default function BrandStory() {
+import type { SiteContent } from "@/lib/site-content";
+
+export default function BrandStory({ content }: { content: SiteContent }) {
   return (
     <section className="bg-[#050505] py-28">
 
@@ -9,11 +11,11 @@ export default function BrandStory() {
         <div>
 
           <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            Our Story
+            {content.storyEyebrow}
           </p>
 
           <h2 className="mt-5 font-serif text-5xl text-white">
-            More Than Fashion
+            {content.storyTitle}
           </h2>
 
         </div>
@@ -21,10 +23,7 @@ export default function BrandStory() {
         <div>
 
           <p className="text-lg leading-9 text-gray-400">
-            IRG represents confidence, ambition and identity.
-            Every collection is designed with premium materials,
-            modern silhouettes and timeless luxury, creating
-            fashion that speaks before you do.
+            {content.storyDescription}
           </p>
 
         </div>

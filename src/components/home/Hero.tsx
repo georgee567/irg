@@ -1,21 +1,33 @@
 "use client";
 
+import type { SiteContent } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Hero() {
+export default function Hero({ content }: { content: SiteContent }) {
   return (
     <section className="relative h-screen overflow-hidden bg-black">
 
       {/* Background */}
-
-      <Image
-        src="/images/hero-model.png"
-        alt="IRG Hero"
-        fill
-        priority
-        className="object-cover object-center"
-      />
+      {content.heroVideo ? (
+        <video
+          src={content.heroVideo}
+          aria-label="IRG campaign"
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+      ) : (
+        <Image
+          src={content.heroImage}
+          alt={content.heroImageAlt}
+          fill
+          priority
+          className="object-cover object-center"
+        />
+      )}
 
       {/* Overlay */}
 
@@ -34,23 +46,20 @@ export default function Hero() {
           <div className="mb-8 inline-flex rounded-full border border-[#D4AF37]/30 bg-black/40 px-6 py-3 backdrop-blur-xl">
 
             <span className="text-[11px] uppercase tracking-[0.45em] text-[#D4AF37]">
-              Luxury Streetwear • Est. 2026
+              {content.heroEyebrow}
             </span>
 
           </div>
 
-          <h1 className="font-serif text-5xl font-semibold leading-[0.9] text-white md:text-7xl xl:text-8xl">
+          <h1 className="whitespace-pre-line font-serif text-5xl font-semibold leading-[0.9] text-white md:text-7xl xl:text-8xl">
 
-            Wear
-            <br />
-            Your Identity
+            {content.heroTitle}
 
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-8 text-gray-300">
 
-            Premium luxury streetwear crafted for creators,
-            visionaries and trendsetters.
+            {content.heroDescription}
 
           </p>
 
@@ -60,14 +69,14 @@ export default function Hero() {
               href="/shop"
               className="rounded-md bg-[#D4AF37] px-9 py-4 font-semibold text-black transition duration-300 hover:scale-105"
             >
-              Shop Now
+              {content.heroPrimaryLabel}
             </Link>
 
             <Link
               href="/about"
               className="rounded-md border border-white/30 bg-white/10 px-9 py-4 font-semibold text-white backdrop-blur-md transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
             >
-              Explore Luxury
+              {content.heroSecondaryLabel}
             </Link>
 
           </div>
@@ -83,15 +92,15 @@ export default function Hero() {
         <div className="w-64 rounded-3xl border border-[#D4AF37]/20 bg-black/45 p-6 backdrop-blur-xl">
 
           <p className="text-[11px] uppercase tracking-[0.3em] text-[#D4AF37]">
-            New Collection
+            {content.heroCollectionLabel}
           </p>
 
           <h3 className="mt-3 font-serif text-3xl text-white">
-            Summer 2026
+            {content.heroCollectionTitle}
           </h3>
 
           <p className="mt-3 text-sm leading-7 text-gray-400">
-            Discover timeless luxury inspired by modern street culture.
+            {content.heroCollectionDescription}
           </p>
 
         </div>
@@ -103,7 +112,7 @@ export default function Hero() {
             <div>
 
               <h2 className="text-3xl font-bold text-[#D4AF37]">
-                50+
+                {content.heroProductsCount}
               </h2>
 
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
@@ -115,7 +124,7 @@ export default function Hero() {
             <div>
 
               <h2 className="text-3xl font-bold text-[#D4AF37]">
-                20K+
+                {content.heroCustomersCount}
               </h2>
 
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">

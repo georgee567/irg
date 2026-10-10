@@ -5,6 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { useCart } from "@/context/CartContext";
+import type { SiteContent } from "@/lib/site-content";
+
+const defaultContent: SiteContent = {
+  productsEyebrow: "Our Products",
+  productsTitle: "IRG Collection",
+  productsButton: "View All",
+};
 
 interface Variant {
   id: string;
@@ -19,7 +26,11 @@ interface Product {
   variants: Variant[];
 }
 
-export default function FeaturedProducts() {
+export default function FeaturedProducts({
+  content = defaultContent,
+}: {
+  content?: SiteContent;
+}) {
   const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -49,11 +60,11 @@ export default function FeaturedProducts() {
         <div className="mb-16 flex items-end justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-              Our Products
+              {content.productsEyebrow}
             </p>
 
             <h2 className="mt-4 font-serif text-5xl text-white">
-              IRG Collection
+              {content.productsTitle}
             </h2>
           </div>
 
@@ -61,7 +72,7 @@ export default function FeaturedProducts() {
             href="/shop"
             className="border border-[#D4AF37] px-6 py-3 text-xs uppercase tracking-[0.3em] text-[#D4AF37]"
           >
-            View All
+            {content.productsButton}
           </Link>
         </div>
 

@@ -1,21 +1,26 @@
-export default function JournalPage() {
+import PageMedia from "@/components/home/PageMedia";
+import { getSiteContent } from "@/lib/site-content";
+
+export default async function JournalPage() {
+  const content = await getSiteContent("journal");
   return (
     <main className="min-h-screen bg-black text-white">
 
       <section className="mx-auto max-w-7xl px-8 py-32">
 
         <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-          Journal
+          {content.eyebrow}
         </p>
 
         <h1 className="mt-5 font-serif text-6xl">
-          IRG Journal
+          {content.title}
         </h1>
 
         <p className="mt-8 max-w-2xl text-lg leading-8 text-gray-400">
-          Fashion stories, styling inspiration, behind-the-scenes and future collections.
+          {content.description}
         </p>
 
+        <PageMedia url={content.mediaUrl} alt={content.mediaAlt} />
       </section>
 
     </main>

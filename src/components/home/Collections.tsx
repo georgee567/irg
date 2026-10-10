@@ -1,27 +1,15 @@
 "use client";
 
+import type { SiteContent } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 
-const collections = [
-  {
-    title: "Men",
-    image: "/images/hero-model.png",
-    href: "/shop?category=men",
-  },
-  {
-    title: "Women",
-    image: "/images/hero-model.png",
-    href: "/shop?category=women",
-  },
-  {
-    title: "Accessories",
-    image: "/images/hero-model.png",
-    href: "/shop?category=accessories",
-  },
-];
-
-export default function Collections() {
+export default function Collections({ content }: { content: SiteContent }) {
+  const collections = [
+    { title: content.menTitle, image: content.menImage, href: "/shop?category=men" },
+    { title: content.womenTitle, image: content.womenImage, href: "/shop?category=women" },
+    { title: content.accessoriesTitle, image: content.accessoriesImage, href: "/shop?category=accessories" },
+  ];
   return (
     <section className="bg-black py-28">
 
@@ -32,11 +20,11 @@ export default function Collections() {
           <div>
 
             <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-              Collections
+              {content.collectionsEyebrow}
             </p>
 
             <h2 className="mt-4 font-serif text-5xl text-white">
-              Explore Categories
+              {content.collectionsTitle}
             </h2>
 
           </div>
@@ -45,7 +33,7 @@ export default function Collections() {
             href="/shop"
             className="hidden md:block border border-[#D4AF37] px-6 py-3 uppercase tracking-[0.25em] text-xs text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
           >
-            View All
+            {content.collectionsButton}
           </Link>
 
         </div>
@@ -76,7 +64,7 @@ export default function Collections() {
                 </h3>
 
                 <span className="mt-4 inline-block border border-[#D4AF37] px-5 py-3 text-xs uppercase tracking-[0.3em] text-[#D4AF37] transition group-hover:bg-[#D4AF37] group-hover:text-black">
-                  Shop Now
+                  {content.collectionsShopButton}
                 </span>
 
               </div>

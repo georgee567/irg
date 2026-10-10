@@ -19,19 +19,21 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
 import { useSearch } from "@/context/SearchContext";
 import BrandLogo from "@/components/layout/BrandLogo";
+import type { SiteContent } from "@/lib/site-content";
 
 const links = [
-  { name: "Home", href: "/" },
-  { name: "Collections", href: "/collections" },
-  { name: "Shop", href: "/shop" },
-  { name: "About", href: "/about" },
-  { name: "Lookbook", href: "/lookbook" },
-  { name: "Custom", href: "/custom" },
-  { name: "Journal", href: "/journal" },
-  { name: "Contact", href: "/contact" },
+  { key: "navHome", name: "Home", href: "/" },
+  { key: "navCollections", name: "Collections", href: "/collections" },
+  { key: "navShop", name: "Shop", href: "/shop" },
+  { key: "navAbout", name: "About", href: "/about" },
+  { key: "navLookbook", name: "Lookbook", href: "/lookbook" },
+  { key: "navCustom", name: "Custom", href: "/custom" },
+  { key: "navJournal", name: "Journal", href: "/journal" },
+  { key: "navWishlist", name: "Wishlist", href: "/wishlist" },
+  { key: "navContact", name: "Contact", href: "/contact" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ content }: { content: SiteContent }) {
   const router = useRouter();
   const { cart } = useCart();
   const { wishlist } = useWishlist();
@@ -91,7 +93,7 @@ export default function Navbar() {
                 href={link.href}
                 className="text-[10px] uppercase tracking-[0.22em] text-white transition hover:text-[#D4AF37]"
               >
-                {link.name}
+                {content[link.key] || link.name}
               </Link>
             ))}
           </div>
@@ -108,7 +110,7 @@ export default function Navbar() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search..."
+                placeholder={content.searchPlaceholder}
                 className="w-full rounded-full border border-[#222] bg-[#090909] py-2.5 pl-10 pr-4 text-sm text-white outline-none transition focus:border-[#D4AF37]"
               />
             </form>
@@ -145,7 +147,7 @@ export default function Navbar() {
               href="/login"
               className="rounded-full border border-[#D4AF37] px-4 py-2 text-[10px] uppercase tracking-[0.22em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
             >
-              Join IRG
+              {content.joinLabel}
             </Link>
           ) : (
             <div ref={dropdownRef} className="relative">
@@ -166,28 +168,28 @@ export default function Navbar() {
                     href={user.role === "ADMIN" ? "/admin" : "/account"}
                     className="block rounded-lg px-4 py-3 hover:bg-[#111]"
                   >
-                    {user.role === "ADMIN" ? "Admin Dashboard" : "Account"}
+                    {user.role === "ADMIN" ? content.adminDashboardLabel : content.accountLabel}
                   </Link>
 
                   <Link
                     href="/orders"
                     className="block rounded-lg px-4 py-3 hover:bg-[#111]"
                   >
-                    Orders
+                    {content.ordersLabel}
                   </Link>
 
                   <Link
                     href="/wishlist"
                     className="block rounded-lg px-4 py-3 hover:bg-[#111]"
                   >
-                    Wishlist
+                    {content.navWishlist}
                   </Link>
 
                   <button
                     onClick={logout}
                     className="mt-3 w-full rounded-xl border border-red-500 py-3 text-red-500"
                   >
-                    Logout
+                    {content.logoutLabel}
                   </button>
                 </div>
               )}
@@ -223,7 +225,7 @@ export default function Navbar() {
                 onClick={handleMobileNavigation}
                 className="border-b border-[#151515] px-2 py-4 text-sm uppercase tracking-[0.25em] text-white transition hover:text-[#D4AF37]"
               >
-                {link.name}
+                {content[link.key] || link.name}
               </Link>
             ))}
 
@@ -234,7 +236,7 @@ export default function Navbar() {
                   onClick={handleMobileNavigation}
                   className="text-sm uppercase tracking-[0.25em] text-[#D4AF37]"
                 >
-                  Login
+                  {content.loginLabel}
                 </Link>
               )}
 
@@ -243,7 +245,7 @@ export default function Navbar() {
                 onClick={handleMobileNavigation}
                 className="text-sm uppercase tracking-[0.25em] text-white transition hover:text-[#D4AF37]"
               >
-                Wishlist
+                {content.navWishlist}
               </Link>
 
               <Link
@@ -251,7 +253,7 @@ export default function Navbar() {
                 onClick={handleMobileNavigation}
                 className="text-sm uppercase tracking-[0.25em] text-white transition hover:text-[#D4AF37]"
               >
-                Cart
+                {content.cartLabel}
               </Link>
             </div>
           </div>

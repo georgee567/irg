@@ -1,31 +1,16 @@
 "use client";
 
+import type { SiteContent } from "@/lib/site-content";
 import { ShieldCheck, Truck, Sparkles, Award } from "lucide-react";
 
-const items = [
-  {
-    icon: ShieldCheck,
-    title: "Premium Quality",
-    text: "Luxury fabrics with premium finishing.",
-  },
-  {
-    icon: Truck,
-    title: "Worldwide Shipping",
-    text: "Fast global delivery.",
-  },
-  {
-    icon: Sparkles,
-    title: "Exclusive Designs",
-    text: "Limited edition collections.",
-  },
-  {
-    icon: Award,
-    title: "Luxury Standard",
-    text: "Designed for timeless elegance.",
-  },
-];
+const icons = [ShieldCheck, Truck, Sparkles, Award];
 
-export default function WhyChoose() {
+export default function WhyChoose({ content }: { content: SiteContent }) {
+  const items = icons.map((icon, index) => ({
+    icon,
+    title: content[`benefit${["One", "Two", "Three", "Four"][index]}Title`],
+    text: content[`benefit${["One", "Two", "Three", "Four"][index]}Text`],
+  }));
   return (
     <section className="bg-black py-28">
 
@@ -34,11 +19,11 @@ export default function WhyChoose() {
         <div className="mb-16 text-center">
 
           <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-            Why IRG
+            {content.benefitsEyebrow}
           </p>
 
           <h2 className="mt-4 font-serif text-5xl text-white">
-            Crafted For Excellence
+            {content.benefitsTitle}
           </h2>
 
         </div>

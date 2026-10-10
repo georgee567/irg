@@ -5,17 +5,19 @@ import Hero from "@/components/home/Hero";
 import Newsletter from "@/components/home/Newsletter";
 import Testimonials from "@/components/home/Testimonials";
 import WhyChoose from "@/components/home/WhyChoose";
+import { getSiteContent } from "@/lib/site-content";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const content = await getSiteContent("home");
   return (
     <main className="overflow-x-hidden bg-black text-white">
-      <Hero />
-      <BrandStory />
-      <FeaturedProducts />
-      <Collections />
-      <WhyChoose />
-      <Testimonials />
-      <Newsletter />
+      <Hero content={content} />
+      <BrandStory content={content} />
+      <FeaturedProducts content={content} />
+      <Collections content={content} />
+      <WhyChoose content={content} />
+      <Testimonials content={content} />
+      <Newsletter content={content} />
     </main>
   );
 }

@@ -1,8 +1,8 @@
-"use client";
-
 import Link from "next/link";
+import { getSiteContent } from "@/lib/site-content";
 
-export default function Footer() {
+export default async function Footer() {
+  const content = await getSiteContent("footer");
   return (
     <footer className="border-t border-[#1b1b1b] bg-black">
 
@@ -15,8 +15,7 @@ export default function Footer() {
           </h2>
 
           <p className="mt-6 leading-8 text-gray-400">
-            Premium luxury streetwear inspired by confidence,
-            identity and timeless fashion.
+            {content.description}
           </p>
 
         </div>
@@ -24,14 +23,14 @@ export default function Footer() {
         <div>
 
           <h3 className="mb-6 font-semibold uppercase tracking-[0.25em] text-white">
-            Shop
+            {content.shopHeading}
           </h3>
 
           <div className="space-y-3 text-gray-400">
 
-            <Link href="/shop" className="block hover:text-[#D4AF37]">Men</Link>
-            <Link href="/shop" className="block hover:text-[#D4AF37]">Women</Link>
-            <Link href="/shop" className="block hover:text-[#D4AF37]">Accessories</Link>
+            <Link href="/shop?category=men" className="block hover:text-[#D4AF37]">{content.menLabel}</Link>
+            <Link href="/shop?category=women" className="block hover:text-[#D4AF37]">{content.womenLabel}</Link>
+            <Link href="/shop?category=accessories" className="block hover:text-[#D4AF37]">{content.accessoriesLabel}</Link>
 
           </div>
 
@@ -40,14 +39,14 @@ export default function Footer() {
         <div>
 
           <h3 className="mb-6 font-semibold uppercase tracking-[0.25em] text-white">
-            Company
+            {content.companyHeading}
           </h3>
 
           <div className="space-y-3 text-gray-400">
 
-            <Link href="/about" className="block hover:text-[#D4AF37]">About</Link>
-            <Link href="/journal" className="block hover:text-[#D4AF37]">Journal</Link>
-            <Link href="/contact" className="block hover:text-[#D4AF37]">Contact</Link>
+            <Link href="/about" className="block hover:text-[#D4AF37]">{content.aboutLabel}</Link>
+            <Link href="/journal" className="block hover:text-[#D4AF37]">{content.journalLabel}</Link>
+            <Link href="/contact" className="block hover:text-[#D4AF37]">{content.contactLabel}</Link>
 
           </div>
 
@@ -56,15 +55,15 @@ export default function Footer() {
         <div>
 
           <h3 className="mb-6 font-semibold uppercase tracking-[0.25em] text-white">
-            Contact
+            {content.contactHeading}
           </h3>
 
           <div className="space-y-3 text-gray-400">
 
-            <p>Kenya</p>
-            <p>georgekabiru27@gmail.com</p>
-            <p>+254 107117425</p>
-            <p>+254 715362959</p>
+            <p>{content.country}</p>
+            <p>{content.email}</p>
+            <p>{content.phoneOne}</p>
+            <p>{content.phoneTwo}</p>
 
           </div>
 
@@ -73,7 +72,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-[#191919] py-6 text-center text-sm text-gray-500">
-        © 2026 IRG. All Rights Reserved.
+        {content.copyright}
       </div>
 
     </footer>
