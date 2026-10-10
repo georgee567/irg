@@ -163,10 +163,10 @@ export default function Navbar() {
               {accountOpen && (
                 <div className="absolute right-0 z-[60] mt-3 w-64 rounded-2xl border border-[#222] bg-[#090909] p-3 shadow-2xl">
                   <Link
-                    href="/account"
+                    href={user.role === "ADMIN" ? "/admin" : "/account"}
                     className="block rounded-lg px-4 py-3 hover:bg-[#111]"
                   >
-                    Account
+                    {user.role === "ADMIN" ? "Admin Dashboard" : "Account"}
                   </Link>
 
                   <Link
