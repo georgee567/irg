@@ -13,7 +13,7 @@ export default function ContactPage() {
         </h1>
 
         <p className="mt-8 text-lg leading-8 text-gray-400">
-          Email: info@irg.com
+          Email: georgekabiru27@gmail.com
           <br />
           Phone: +254 107117425
           <br />

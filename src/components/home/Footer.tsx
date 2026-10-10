@@ -62,7 +62,7 @@ export default function Footer() {
           <div className="space-y-3 text-gray-400">
 
             <p>Kenya</p>
-            <p>info@irg.com</p>
+            <p>georgekabiru27@gmail.com</p>
             <p>+254 107117425</p>
             <p>+254 715362959</p>
 
