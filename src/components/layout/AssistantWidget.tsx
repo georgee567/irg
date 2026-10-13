@@ -220,7 +220,7 @@ export default function AssistantWidget({
               </button>
             </div>
             <p className="mt-2 text-center text-[10px] leading-4 text-gray-500">
-              AI support powered by OpenAI. Don&apos;t share passwords or payment details.
+              Test assistant powered by Google Gemini. Free-tier chats may be used to improve Google products. Don&apos;t share personal, password, or payment details.
             </p>
           </form>
         </section>

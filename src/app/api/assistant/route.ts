@@ -23,18 +23,13 @@ function isChatMessage(value: unknown): value is ChatMessage {
 }
 
 function getReply(data: unknown): string | null {
-  if (!isRecord(data) || !Array.isArray(data.output)) return null;
+  if (!isRecord(data) || !Array.isArray(data.candidates)) return null;
 
-  for (const item of data.output) {
-    if (!isRecord(item) || !Array.isArray(item.content)) continue;
+  for (const candidate of data.candidates) {
+    if (!isRecord(candidate) || !isRecord(candidate.content) || !Array.isArray(candidate.content.parts)) continue;
 
-    for (const part of item.content) {
-      if (
-        isRecord(part) &&
-        part.type === "output_text" &&
-        typeof part.text === "string" &&
-        part.text.trim()
-      ) {
+    for (const part of candidate.content.parts) {
+      if (isRecord(part) && typeof part.text === "string" && part.text.trim()) {
         return part.text.trim();
       }
     }
@@ -44,9 +39,9 @@ function getReply(data: unknown): string | null {
 }
 
 export async function POST(request: Request) {
-  if (!process.env.OPENAI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
-      { error: "The customer assistant is not configured yet. Please contact IRG directly." },
+      { error: "The test assistant is not configured yet. Please contact IRG directly." },
       { status: 503 },
     );
   }
@@ -149,29 +144,44 @@ export async function POST(request: Request) {
       `Live product catalog: ${JSON.stringify(catalog)}`,
     ].join("\n\n");
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL || "gemini-2.5-flash-lite"}:generateContent`,
+      {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
+        "x-goog-api-key": process.env.GEMINI_API_KEY,
       },
       body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4.1",
-        instructions,
-        input: messages,
-        max_output_tokens: 500,
-        store: false,
+        systemInstruction: { parts: [{ text: instructions }] },
+        contents: messages.map((message) => ({
+          role: message.role === "assistant" ? "model" : "user",
+          parts: [{ text: message.content }],
+        })),
+        generationConfig: { maxOutputTokens: 500 },
       }),
       signal: AbortSignal.timeout(30_000),
-    });
+      },
+    );
 
     if (!response.ok) {
-      console.error("Customer assistant provider request failed:", response.status);
+      let providerStatus = "unknown";
+      try {
+        const errorData: unknown = await response.json();
+        if (isRecord(errorData) && isRecord(errorData.error) && typeof errorData.error.status === "string") {
+          providerStatus = errorData.error.status;
+        }
+      } catch (error) {
+        console.error("Unable to read Gemini error response:", error);
+      }
+      console.error("Customer assistant provider request failed:", response.status, providerStatus);
       return NextResponse.json(
         {
           error: response.status === 429
-            ? "The assistant is busy right now. Please try again shortly."
-            : "The assistant is temporarily unavailable. Please try again or contact IRG.",
+            ? "The free AI test quota is temporarily unavailable or exhausted. Please try again later."
+            : response.status === 401 || response.status === 403
+              ? "The Gemini test key is invalid or Gemini API access is not enabled. Please contact IRG."
+              : "The assistant is temporarily unavailable. Please try again or contact IRG.",
         },
         { status: response.status === 429 ? 429 : 502 },
       );

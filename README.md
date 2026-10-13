@@ -749,18 +749,18 @@ npm start
 
 ## AI Customer Assistant
 
-The site-wide customer assistant uses the OpenAI Responses API. Add these server-side variables to `.env.local` for local development and to the production deployment's environment settings:
+The site-wide **test** customer assistant uses Google's Gemini API. Add these server-side variables to `.env.local` for local development and to the production deployment's environment settings:
 
 ```dotenv
-OPENAI_API_KEY="your-openai-api-key"
-OPENAI_MODEL="gpt-4.1"
+GEMINI_API_KEY="your-gemini-api-key"
+GEMINI_MODEL="gemini-2.5-flash-lite"
 ```
 
-You can set `OPENAI_MODEL` to another model available to your OpenAI account. Never expose the API key through a `NEXT_PUBLIC_` variable.
+Create a key in [Google AI Studio](https://aistudio.google.com/apikey). The default model is `gemini-2.5-flash-lite`; only use a model available on the project's Gemini API tier. Keep the key server-side and never expose it through a `NEXT_PUBLIC_` variable. The Gemini free tier has quotas, and Google may use free-tier content to improve its products. Do not use this test assistant for sensitive customer information.
 
 Admins can teach the assistant by opening **Admin → Site Content → Assistant** and editing its welcome message, instructions, and verified store knowledge. The assistant also uses the current product catalog and contact-page details. It cannot look up a customer's private orders.
 
-Customer messages are sent to OpenAI to generate replies. The assistant is unavailable until a valid API key is configured.
+Customer messages are sent to Google to generate replies. The assistant is unavailable until a valid Gemini API key is configured.
 
 # Deployment
 
