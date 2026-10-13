@@ -144,8 +144,8 @@ export default function SiteContentEditor() {
         <p className="text-xs uppercase tracking-[0.3em] text-[#D4AF37]">Website editor</p>
         <h1 className="mt-3 font-serif text-4xl text-white">Manage Site Content</h1>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-gray-400">
-          Edit the text and media URLs used across the public pages. Upload images or videos here
-          (up to 100 MB), then copy the URL into the relevant field before saving.
+          Edit public page content and the customer assistant&apos;s instructions and knowledge.
+          Upload images or videos here (up to 100 MB), then copy the URL into the relevant field before saving.
         </p>
       </div>
 
@@ -190,7 +190,13 @@ export default function SiteContentEditor() {
                         ...(current ?? selected.content),
                         [key]: event.target.value,
                       }))}
-                      rows={key.toLowerCase().includes("description") ? 4 : 2}
+                      maxLength={
+                        key === "assistantName" ? 80
+                          : key === "welcomeMessage" ? 500
+                            : ["instructions", "knowledge"].includes(key) ? 6_000
+                              : undefined
+                      }
+                      rows={["description", "instructions", "knowledge"].some((term) => key.toLowerCase().includes(term)) ? 8 : 2}
                       className="mt-2 w-full resize-y rounded-md border border-[#333] bg-black p-3 text-sm text-white"
                     />
                   </label>

@@ -2,7 +2,7 @@ import { connection } from "next/server";
 
 import { prisma } from "@/lib/prisma";
 
-export type SitePage = "home" | "about" | "contact" | "journal" | "lookbook" | "custom" | "footer" | "header";
+export type SitePage = "home" | "about" | "contact" | "journal" | "lookbook" | "custom" | "footer" | "header" | "assistant";
 export type SiteContent = Record<string, string>;
 
 export const siteContentDefaults: Record<SitePage, SiteContent> = {
@@ -134,6 +134,12 @@ export const siteContentDefaults: Record<SitePage, SiteContent> = {
     logoutLabel: "Logout",
     loginLabel: "Login",
     cartLabel: "Cart",
+  },
+  assistant: {
+    assistantName: "IRG Assistant",
+    welcomeMessage: "Welcome to IRG. How can I help you today?",
+    instructions: "Be warm, polished, and concise. Help customers discover products, understand the store, and find the right contact or directions.",
+    knowledge: "IRG advertises free worldwide shipping. Do not invent delivery timelines, return policies, or other store policies that are not listed here. For order-specific questions, explain that you cannot access customer orders and direct the customer to sign in at /orders or contact IRG.",
   },
 };
 

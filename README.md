@@ -747,6 +747,21 @@ npm start
 
 ---
 
+## AI Customer Assistant
+
+The site-wide customer assistant uses the OpenAI Responses API. Add these server-side variables to `.env.local` for local development and to the production deployment's environment settings:
+
+```dotenv
+OPENAI_API_KEY="your-openai-api-key"
+OPENAI_MODEL="gpt-4.1"
+```
+
+You can set `OPENAI_MODEL` to another model available to your OpenAI account. Never expose the API key through a `NEXT_PUBLIC_` variable.
+
+Admins can teach the assistant by opening **Admin → Site Content → Assistant** and editing its welcome message, instructions, and verified store knowledge. The assistant also uses the current product catalog and contact-page details. It cannot look up a customer's private orders.
+
+Customer messages are sent to OpenAI to generate replies. The assistant is unavailable until a valid API key is configured.
+
 # Deployment
 
 The final application is intended to be deployed using **Vercel**.
