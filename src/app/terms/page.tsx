@@ -13,14 +13,10 @@ export default function TermsPage() {
   return (
     <main className="min-h-screen bg-black px-8 py-24 text-white">
       <article className="mx-auto max-w-4xl">
-        <p className="text-xs uppercase tracking-[0.35em] text-[#D4AF37]">
-          Draft for IRG review
-        </p>
         <h1 className="mt-5 font-serif text-5xl">Terms of Service</h1>
         <p className={paragraphClass}>
-          This draft covers use of the IRG online store. IRG should review and
-          approve it before relying on it as a final legal agreement. Last
-          updated: October 16, 2026.
+          These terms cover use of the IRG online store. Last updated:
+          October 16, 2026.
         </p>
 
         <section className={sectionClass}>
