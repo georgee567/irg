@@ -42,9 +42,9 @@ function getProviderConfig(provider: Provider, callbackUrl: string) {
   const clientId = process.env.FACEBOOK_CLIENT_ID;
   if (!clientId) throw new Error("Facebook OAuth is not configured.");
   return {
-    authorizationUrl: "https://www.facebook.com/v20.0/dialog/oauth",
-    tokenUrl: "https://graph.facebook.com/v20.0/oauth/access_token",
-    profileUrl: "https://graph.facebook.com/me?fields=id,name,email",
+    authorizationUrl: "https://www.facebook.com/v26.0/dialog/oauth",
+    tokenUrl: "https://graph.facebook.com/v26.0/oauth/access_token",
+    profileUrl: "https://graph.facebook.com/v26.0/me?fields=id,name,email",
     clientId,
     clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
     scope: "email,public_profile",
