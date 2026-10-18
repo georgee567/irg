@@ -82,16 +82,16 @@ export default function Navbar({ content }: { content: SiteContent }) {
 
   return (
     <header className="relative sticky top-0 z-50 border-b border-[#191919] bg-black/95 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[72px] max-w-7xl flex-wrap items-center justify-between gap-x-3 px-3 sm:px-6 lg:px-8">
-        <BrandLogo />
+      <div className="mx-auto flex min-h-[88px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <BrandLogo className="mr-2" />
 
-        <nav className="order-3 hidden w-full min-w-0 items-center justify-center border-t border-[#191919] py-3 lg:flex">
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+        <nav className="hidden flex-1 items-center justify-center xl:flex">
+          <div className="flex items-center gap-5 lg:gap-7">
             {links.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
-                className="whitespace-nowrap text-[10px] uppercase tracking-[0.16em] text-white transition hover:text-[#D4AF37]"
+                className="text-[10px] uppercase tracking-[0.22em] text-white transition hover:text-[#D4AF37]"
               >
                 {content[link.key] || link.name}
               </Link>
@@ -99,29 +99,28 @@ export default function Navbar({ content }: { content: SiteContent }) {
           </div>
         </nav>
 
-        <div className="order-2 flex min-w-0 items-center gap-2 sm:gap-3 lg:gap-4">
-          <div className="relative hidden min-w-0 flex-1 sm:block sm:w-[clamp(140px,18vw,220px)] sm:flex-none">
+        <div className="hidden items-center gap-3 lg:flex xl:gap-4">
+          <div className="relative hidden w-[220px] xl:block">
             <form onSubmit={handleSearchSubmit} className="w-full">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
               />
 
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={content.searchPlaceholder}
-                className="w-full rounded-full border border-[#222] bg-[#090909] py-2.5 pl-9 pr-3 text-sm text-white outline-none transition focus:border-[#D4AF37]"
+                className="w-full rounded-full border border-[#222] bg-[#090909] py-2.5 pl-10 pr-4 text-sm text-white outline-none transition focus:border-[#D4AF37]"
               />
             </form>
           </div>
 
           <Link
             href="/wishlist"
-            aria-label={`${content.navWishlist}${wishlist.length ? ` (${wishlist.length})` : ""}`}
-            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37] sm:h-10 sm:w-10"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
           >
-            <Heart size={17} />
+            <Heart size={18} />
 
             {wishlist.length > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37] text-[10px] font-bold text-black">
@@ -132,10 +131,9 @@ export default function Navbar({ content }: { content: SiteContent }) {
 
           <Link
             href="/cart"
-            aria-label={`${content.cartLabel}${cartCount ? ` (${cartCount})` : ""}`}
-            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37] sm:h-10 sm:w-10"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
           >
-            <ShoppingBag size={17} />
+            <ShoppingBag size={18} />
 
             {cartCount > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37] text-[10px] font-bold text-black">
@@ -147,24 +145,21 @@ export default function Navbar({ content }: { content: SiteContent }) {
           {!user ? (
             <Link
               href="/login"
-              aria-label={content.loginLabel}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#D4AF37] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black sm:h-10 sm:w-10 lg:w-auto lg:px-4 lg:py-2 lg:text-[10px] lg:uppercase lg:tracking-[0.22em]"
+              className="rounded-full border border-[#D4AF37] px-4 py-2 text-[10px] uppercase tracking-[0.22em] text-[#D4AF37] transition hover:bg-[#D4AF37] hover:text-black"
             >
-              <User size={17} className="lg:hidden" />
-              <span className="hidden lg:inline">{content.joinLabel}</span>
+              {content.joinLabel}
             </Link>
           ) : (
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setAccountOpen(!accountOpen)}
-                aria-label={`${user.name} account`}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#222] text-sm text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37] sm:h-10 sm:w-10 lg:h-auto lg:w-auto lg:gap-2 lg:px-3 lg:py-2"
+                className="flex items-center gap-2 rounded-full border border-[#222] px-3 py-2 text-sm text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
               >
-                <User size={16} className="lg:hidden" />
+                <User size={16} />
 
-                <span className="hidden max-w-[100px] truncate lg:inline">{user.name}</span>
+                <span className="max-w-[100px] truncate">{user.name}</span>
 
-                <ChevronDown size={14} className="hidden lg:block" />
+                <ChevronDown size={14} />
               </button>
 
               {accountOpen && (
@@ -211,7 +206,7 @@ export default function Navbar({ content }: { content: SiteContent }) {
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           aria-controls="mobile-navigation"
-          className="order-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37] sm:h-10 sm:w-10 lg:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-[#222] text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37] xl:hidden"
         >
           {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -220,22 +215,9 @@ export default function Navbar({ content }: { content: SiteContent }) {
       {menuOpen && (
         <div
           id="mobile-navigation"
-          className="relative z-[55] border-t border-[#1b1b1b] bg-black shadow-2xl lg:hidden"
+          className="relative z-[55] border-t border-[#1b1b1b] bg-black shadow-2xl xl:hidden"
         >
-          <div className="mx-auto flex max-h-[calc(100vh-72px)] max-w-7xl flex-col overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
-            <form onSubmit={handleSearchSubmit} className="relative mb-3 sm:hidden">
-              <Search
-                size={16}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-              />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={content.searchPlaceholder}
-                aria-label={content.searchPlaceholder}
-                className="w-full rounded-full border border-[#222] bg-[#090909] py-3 pl-11 pr-4 text-sm text-white outline-none transition focus:border-[#D4AF37]"
-              />
-            </form>
+          <div className="mx-auto flex max-h-[calc(100vh-88px)] max-w-7xl flex-col overflow-y-auto px-4 py-4 sm:px-6 lg:px-8">
             {links.map((link) => (
               <Link
                 key={link.name}

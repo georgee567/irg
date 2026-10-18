@@ -6,7 +6,7 @@ export default async function Footer() {
   return (
     <footer className="border-t border-[#1b1b1b] bg-black">
 
-      <div className="mx-auto grid max-w-7xl gap-12 px-8 py-20 md:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl gap-12 px-8 py-20 md:grid-cols-4">
 
         <div>
 
