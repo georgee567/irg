@@ -122,12 +122,18 @@ export default function SearchPage() {
                   >
                     <Link href={`/product/${product.id}`}>
                       <div className="relative h-80">
-                        <Image
-                          src={product.images?.[0] ?? "/images/products/jacket-01.jpg"}
-                          alt={product.name}
-                          fill
-                          className="object-cover transition duration-700 hover:scale-110"
-                        />
+                        {product.images?.[0] ? (
+                          <Image
+                            src={product.images[0]}
+                            alt={product.name}
+                            fill
+                            className="object-cover transition duration-700 hover:scale-110"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-[#111] text-sm text-gray-500">
+                            Image coming soon
+                          </div>
+                        )}
                       </div>
                     </Link>
 

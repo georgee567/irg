@@ -22,8 +22,9 @@ export default function MpesaForm({ value, onChange }: Props) {
       />
 
       <p className="mt-4 text-sm text-gray-400">
-        After clicking <strong>Place Order</strong>, an STK Push
-        request will be sent to your phone.
+        Daraja Sandbox testing only. No live merchant account or real payment
+        is used. The sandbox STK Push is sent after clicking{" "}
+        <strong>Place Order</strong>.
       </p>
 
     </div>

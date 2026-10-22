@@ -10,7 +10,10 @@ const links = [
   ["Categories", "/admin/categories"],
   ["Customers / Users", "/admin/customers"],
   ["Orders", "/admin/orders"],
+  ["Reviews", "/admin/reviews"],
+  ["Support", "/admin/support"],
   ["Site Content", "/admin/content"],
+  ["Editorial", "/admin/editorial"],
   ["Settings", "/admin/settings"],
 ] as const;
 

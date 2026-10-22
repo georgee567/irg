@@ -101,12 +101,18 @@ export default function WishlistPage() {
               >
                 <Link href={`/product/${item.product.id}`}>
                   <div className="relative h-80">
-                    <Image
-                      src={item.product.images?.[0] ?? "/images/products/jacket-01.jpg"}
-                      alt={item.product.name}
-                      fill
-                      className="object-cover"
-                    />
+                    {item.product.images?.[0] ? (
+                      <Image
+                        src={item.product.images[0]}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-[#111] text-sm text-gray-500">
+                        Image coming soon
+                      </div>
+                    )}
                   </div>
                 </Link>
 

@@ -483,11 +483,11 @@ Future administrator functionality:
 
 # Payments
 
-Production payment integration will eventually support:
+Payment integration is currently for development and testing only:
 
 ### M-Pesa
 
-Expected flow:
+Daraja Sandbox flow:
 
 ```text
 Customer
@@ -500,16 +500,19 @@ Customer confirms payment
    ↓
 Payment verification
    ↓
-Order created
+Pending order created
    ↓
 Confirmation
 ```
 
-### Card Payments
+Production M-Pesa and card payments are disabled. The M-Pesa code only calls
+Daraja Sandbox and refuses a production environment setting. See
+[Daraja Sandbox setup](./docs/MPESA_SANDBOX_SETUP.md) for credentials, local
+callback setup, and test instructions.
 
-Visa and Mastercard will be integrated through a suitable payment provider/gateway.
-
-No payment system should be considered production-ready until payment verification, security, callbacks/webhooks, and order confirmation are implemented correctly.
+No payment system should be considered production-ready until payment
+verification, security, callbacks/webhooks, and order confirmation are
+implemented and reviewed for the target production provider.
 
 ---
 

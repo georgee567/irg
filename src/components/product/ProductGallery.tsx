@@ -11,21 +11,25 @@ interface Props {
 export default function ProductGallery({
   product,
 }: Props) {
-  const images = product.images?.length
-    ? product.images
-    : ["/images/products/jacket-01.jpg"];
+  const images = product.images ?? [];
 
-  const [selected, setSelected] = useState(images[0]);
+  const [selected, setSelected] = useState(images[0] ?? "");
 
   return (
     <div>
       <div className="relative h-[700px] overflow-hidden rounded-3xl border border-[#222]">
-        <Image
-          src={selected}
-          alt={product.name}
-          fill
-          className="object-cover"
-        />
+        {selected ? (
+          <Image
+            src={selected}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center bg-[#111] text-sm text-gray-500">
+            Product images have not been added yet.
+          </div>
+        )}
       </div>
 
       {images.length > 1 && (

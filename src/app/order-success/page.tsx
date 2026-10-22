@@ -14,12 +14,15 @@ function OrderSuccessContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadOrder() {
-      if (!orderId) {
-        setLoading(false);
-        return;
-      }
+    if (!orderId) {
+      return;
+    }
 
+    let cancelled = false;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    async function loadOrder() {
       try {
         const response = await fetch(`/api/orders/${orderId}`, {
           method: "GET",
@@ -32,15 +35,24 @@ function OrderSuccessContent() {
         }
 
         const data = await response.json();
+        if (cancelled) return;
         setOrder(data.order);
+        attempts += 1;
+        if (data.order.paymentStatus === "PENDING" && attempts < 24) {
+          timer = setTimeout(loadOrder, 5000);
+        }
       } catch (error) {
-        console.error("Load order error:", error);
+        if (!cancelled) console.error("Load order error:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
 
-    loadOrder();
+    void loadOrder();
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
   }, [orderId]);
 
   return (
@@ -49,11 +61,13 @@ function OrderSuccessContent() {
         <h1 className="font-serif text-6xl text-[#D4AF37]">Thank You</h1>
         <p className="mt-6 text-xl text-gray-400">
           {order?.paymentStatus === "PAID"
-            ? "Your payment has been confirmed and your order is being processed."
-            : "Your order is awaiting payment confirmation. Check your phone to complete the M-Pesa request."}
+            ? "Your sandbox payment has been confirmed and your order is being processed."
+            : order?.paymentStatus === "FAILED"
+              ? "The sandbox payment was cancelled, timed out, or failed. No live funds were charged. Place a new order to try again."
+              : "Your order is awaiting sandbox payment confirmation. Complete the Daraja test flow; this page checks for the callback automatically."}
         </p>
 
-        {loading ? (
+        {loading && orderId ? (
           <p className="mt-8 text-gray-400">Loading order details...</p>
         ) : order ? (
           <div className="mt-8 rounded-2xl border border-[#222] p-6 text-left">

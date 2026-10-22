@@ -2,11 +2,20 @@
 
 import type { SiteContent } from "@/lib/site-content";
 
-export default function Testimonials({ content }: { content: SiteContent }) {
-  const reviews = ["One", "Two", "Three"].map((number) => ({
-    name: content[`testimonial${number}Name`],
-    text: content[`testimonial${number}Text`],
-  }));
+type TestimonialReview = {
+  id: string;
+  rating: number;
+  text: string;
+  name: string;
+};
+
+export default function Testimonials({
+  content,
+  reviews,
+}: {
+  content: SiteContent;
+  reviews: TestimonialReview[];
+}) {
   return (
     <section className="bg-[#050505] py-28">
 
@@ -29,9 +38,13 @@ export default function Testimonials({ content }: { content: SiteContent }) {
           {reviews.map((review) => (
 
             <div
-              key={review.name}
+              key={review.id}
               className="rounded-3xl border border-[#222] bg-black p-10"
             >
+
+              <p className="mb-4 text-[#D4AF37]" aria-label={`${review.rating} out of 5 stars`}>
+                {"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}
+              </p>
 
               <p className="text-lg leading-8 italic text-gray-300">
                 &ldquo;{review.text}&rdquo;
@@ -46,6 +59,11 @@ export default function Testimonials({ content }: { content: SiteContent }) {
           ))}
 
         </div>
+        {reviews.length === 0 ? (
+          <p className="mt-8 text-center text-gray-400">
+            Verified customer reviews will appear here as customers share their experiences.
+          </p>
+        ) : null}
 
       </div>
 

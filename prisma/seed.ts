@@ -87,6 +87,14 @@ async function main() {
     },
   });
 
+  const irgCategory = await prisma.category.create({
+    data: {
+      ...timestamps(),
+      name: "IRG",
+      slug: "irg",
+    },
+  });
+
   const accessoriesCategory = await prisma.category.create({
     data: {
       ...timestamps(),
@@ -242,6 +250,43 @@ async function main() {
           color: "Yellow",
           price: "8500",
           stock: 8,
+        },
+      ],
+    },
+
+    {
+      id: randomUUID(),
+      name: "IRG Knit Sweater",
+      slug: "irg-knit-sweater",
+      description:
+        "A premium IRG knit sweater designed with a clean silhouette, elevated texture, and the refined luxury feel of the IRG brand.",
+      price: "18000",
+      images: [
+        "/images/products/sweater-01.png",
+      ],
+      featured: true,
+      categoryId: irgCategory.id,
+      variants: [
+        {
+          ...timestamps(),
+          size: "S",
+          color: "Cream",
+          price: "18000",
+          stock: 8,
+        },
+        {
+          ...timestamps(),
+          size: "M",
+          color: "Cream",
+          price: "18000",
+          stock: 10,
+        },
+        {
+          ...timestamps(),
+          size: "L",
+          color: "Cream",
+          price: "18000",
+          stock: 9,
         },
       ],
     },

@@ -4,12 +4,21 @@ import type { SiteContent } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Collections({ content }: { content: SiteContent }) {
-  const collections = [
-    { title: content.menTitle, image: content.menImage, href: "/shop?category=men" },
-    { title: content.womenTitle, image: content.womenImage, href: "/shop?category=women" },
-    { title: content.accessoriesTitle, image: content.accessoriesImage, href: "/shop?category=accessories" },
-  ];
+type CollectionCategory = { id: string; name: string; slug: string };
+
+export default function Collections({
+  content,
+  categories,
+}: {
+  content: SiteContent;
+  categories: CollectionCategory[];
+}) {
+  const images: Record<string, string> = {
+    men: content.menImage,
+    women: content.womenImage,
+    accessories: content.accessoriesImage,
+  };
+
   return (
     <section className="bg-black py-28">
 
@@ -40,27 +49,31 @@ export default function Collections({ content }: { content: SiteContent }) {
 
         <div className="grid gap-8 lg:grid-cols-3">
 
-          {collections.map((item) => (
+          {categories.map((category) => (
 
             <Link
-              key={item.title}
-              href={item.href}
+              key={category.id}
+              href={`/shop?category=${encodeURIComponent(category.slug)}`}
               className="group relative h-[560px] overflow-hidden rounded-3xl"
             >
 
-              <Image
-                src={item.image}
-                alt={item.title}
-                fill
-                className="object-cover transition duration-700 group-hover:scale-110"
-              />
+              {images[category.slug] ? (
+                <Image
+                  src={images[category.slug]}
+                  alt={category.name}
+                  fill
+                  className="object-cover transition duration-700 group-hover:scale-110"
+                />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-[#262016] via-[#111] to-black" />
+              )}
 
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
               <div className="absolute bottom-10 left-10">
 
                 <h3 className="font-serif text-4xl text-white">
-                  {item.title}
+                  {category.name}
                 </h3>
 
                 <span className="mt-4 inline-block border border-[#D4AF37] px-5 py-3 text-xs uppercase tracking-[0.3em] text-[#D4AF37] transition group-hover:bg-[#D4AF37] group-hover:text-black">
@@ -74,6 +87,11 @@ export default function Collections({ content }: { content: SiteContent }) {
           ))}
 
         </div>
+        {categories.length === 0 ? (
+          <p className="rounded-2xl border border-[#222] bg-[#090909] p-8 text-center text-gray-400">
+            Categories will appear here when products are added.
+          </p>
+        ) : null}
 
       </div>
 

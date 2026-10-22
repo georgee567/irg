@@ -4,7 +4,15 @@ import type { SiteContent } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Hero({ content }: { content: SiteContent }) {
+export default function Hero({
+  content,
+  productCount,
+  customerCount,
+}: {
+  content: SiteContent;
+  productCount: number;
+  customerCount: number;
+}) {
   return (
     <section className="relative h-screen overflow-hidden bg-black">
 
@@ -112,7 +120,7 @@ export default function Hero({ content }: { content: SiteContent }) {
             <div>
 
               <h2 className="text-3xl font-bold text-[#D4AF37]">
-                {content.heroProductsCount}
+                {productCount.toLocaleString()}
               </h2>
 
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
@@ -124,7 +132,7 @@ export default function Hero({ content }: { content: SiteContent }) {
             <div>
 
               <h2 className="text-3xl font-bold text-[#D4AF37]">
-                {content.heroCustomersCount}
+                {customerCount.toLocaleString()}
               </h2>
 
               <p className="mt-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
@@ -139,9 +147,22 @@ export default function Hero({ content }: { content: SiteContent }) {
 
       </div>
 
+      <div className="absolute bottom-12 left-4 right-4 z-30 rounded-2xl border border-[#222] bg-black/60 p-4 backdrop-blur-xl sm:left-8 sm:right-8 sm:p-5 xl:hidden">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-2xl font-bold text-[#D4AF37]">{productCount.toLocaleString()}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-gray-400">Products</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-[#D4AF37]">{customerCount.toLocaleString()}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-gray-400">Customers</p>
+          </div>
+        </div>
+      </div>
+
       {/* Scroll */}
 
-      <div className="absolute bottom-14 left-1/2 z-30 -translate-x-1/2">
+      <div className="absolute bottom-14 left-1/2 z-30 hidden -translate-x-1/2 xl:block">
 
         <div className="h-14 w-px bg-[#D4AF37]" />
 

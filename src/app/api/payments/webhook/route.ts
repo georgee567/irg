@@ -3,6 +3,10 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/payment-webhook";
+import {
+  failPendingOrderPayment,
+  markPendingOrderPaid,
+} from "@/lib/order-inventory";
 
 type WebhookBody = {
   orderId?: unknown;
@@ -26,42 +30,60 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "orderId, supported status, and transactionReference are required." }, { status: 400 });
     }
 
-    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, paymentStatus: true, status: true },
+    });
     if (!order) return NextResponse.json({ error: "Order not found." }, { status: 404 });
+    if (order.paymentStatus !== "PENDING" || order.status === "CANCELLED") {
+      return NextResponse.json({ error: "This order is no longer payable." }, { status: 409 });
+    }
 
     const existingReference = await prisma.payment.findUnique({ where: { transactionReference } });
-    if (existingReference?.status === "PAID") {
+    if (existingReference && existingReference.orderId !== orderId) {
+      return NextResponse.json({ error: "Transaction reference is already assigned to another order." }, { status: 409 });
+    }
+    if (existingReference?.status === "PAID" && existingReference.orderId === orderId) {
       return NextResponse.json({ message: "Payment was already confirmed.", transactionReference });
     }
 
-    const payment = await prisma.payment.findFirst({
+    const payment = existingReference ?? await prisma.payment.findFirst({
       where: { orderId, status: "PENDING" },
       orderBy: { createdAt: "desc" },
     });
     if (!payment) return NextResponse.json({ error: "No pending payment found for this order." }, { status: 409 });
+    if (payment.status !== "PENDING") {
+      return NextResponse.json({ error: "This payment cannot be processed again." }, { status: 409 });
+    }
 
     const providerResponse = JSON.parse(rawBody) as Prisma.InputJsonValue;
     if (status === "SUCCESS") {
-      await prisma.$transaction([
-        prisma.payment.update({
-          where: { id: payment.id },
-          data: { status: "PAID", transactionReference, providerResponse },
+      const result = await prisma.$transaction((transaction) =>
+        markPendingOrderPaid(transaction, orderId, payment.id, {
+          status: "PAID",
+          transactionReference,
+          providerResponse,
         }),
-        prisma.order.update({
-          where: { id: orderId },
-          data: { paymentStatus: "PAID", status: order.status === "PENDING" ? "CONFIRMED" : order.status },
-        }),
-      ]);
-      return NextResponse.json({ message: "Payment confirmed.", transactionReference });
+      );
+      if (!result) {
+        return NextResponse.json({ message: "Payment was already processed.", transactionReference });
+      }
+      return NextResponse.json({
+        message: result === "INVENTORY_REVIEW"
+          ? "Payment confirmed; order requires inventory review."
+          : "Payment confirmed.",
+        transactionReference,
+        inventoryReviewRequired: result === "INVENTORY_REVIEW",
+      });
     }
 
-    await prisma.$transaction([
-      prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: "FAILED", transactionReference, providerResponse },
+    await prisma.$transaction((transaction) =>
+      failPendingOrderPayment(transaction, orderId, payment.id, {
+        status: "FAILED",
+        transactionReference,
+        providerResponse,
       }),
-      prisma.order.update({ where: { id: orderId }, data: { paymentStatus: "FAILED" } }),
-    ]);
+    );
     return NextResponse.json({ message: "Payment marked as failed.", transactionReference });
   } catch (error) {
     console.error("Payment webhook error:", error);

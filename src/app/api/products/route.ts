@@ -6,9 +6,30 @@ import { getCurrentUser } from "@/lib/auth";
 import { serializeProduct } from "@/lib/serialize";
 
 // GET /api/products
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const requestedCategory = new URL(request.url).searchParams
+      .get("category")
+      ?.trim();
+    const category = requestedCategory
+      ? await prisma.category.findFirst({
+          where: {
+            OR: [
+              { id: requestedCategory },
+              { slug: requestedCategory.toLowerCase() },
+              { name: { equals: requestedCategory, mode: "insensitive" } },
+            ],
+          },
+          select: { id: true },
+        })
+      : null;
+
+    if (requestedCategory && !category) {
+      return NextResponse.json({ error: "Category not found." }, { status: 404 });
+    }
+
     const products = await prisma.product.findMany({
+      where: category ? { categoryId: category.id } : undefined,
       include: {
         Category: true,
         ProductVariant: true,

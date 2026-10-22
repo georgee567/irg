@@ -1,4 +1,5 @@
 import PageMedia from "@/components/home/PageMedia";
+import SupportRequestForm from "@/components/support/SupportRequestForm";
 import { getSiteContent } from "@/lib/site-content";
 
 export default async function CustomPage() {
@@ -21,6 +22,12 @@ export default async function CustomPage() {
         </p>
 
         <PageMedia url={content.mediaUrl} alt={content.mediaAlt} />
+        <div className="mt-12 max-w-2xl">
+          <SupportRequestForm
+            defaultSubject="Custom order request"
+            heading="Tell us about your design"
+          />
+        </div>
       </section>
 
     </main>

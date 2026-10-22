@@ -43,6 +43,7 @@ model Order {
   userId          String
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
+  inventoryDeducted Boolean      @default(false)
   subtotal        Decimal       @db.Decimal(10, 2)
   shipping        Decimal       @db.Decimal(10, 2)
   total           Decimal       @db.Decimal(10, 2)
@@ -57,6 +58,8 @@ model Order {
   User            User          @relation(fields: [userId], references: [id])
   OrderItem       OrderItem[]
   Payment         Payment[]
+
+  @@index([paymentStatus, status, createdAt])
 }
 
 model OrderItem {
@@ -107,9 +110,31 @@ model Product {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   OrderItem      OrderItem[]
+  ProductReview  ProductReview[]
+  EditorialEntry EditorialEntry[]
   Category       Category         @relation(fields: [categoryId], references: [id])
   ProductVariant ProductVariant[]
   WishlistItem   WishlistItem[]
+}
+
+model EditorialEntry {
+  id          String         @id @default(uuid())
+  type        EditorialType
+  title       String
+  slug        String
+  summary     String
+  body        String
+  imageUrl    String         @default("")
+  imageAlt    String         @default("")
+  published   Boolean        @default(false)
+  publishedAt DateTime?
+  productId   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  Product     Product?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@unique([type, slug])
+  @@index([type, published, publishedAt])
 }
 
 model ProductVariant {
@@ -145,18 +170,47 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 }
 
-model User {
-  id        String    @id @default(uuid())
+model ProductReview {
+  id        String       @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  title     String
+  body      String
+  status    ReviewStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  Product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  User      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId, status, createdAt])
+}
+
+model SupportRequest {
+  id        String               @id @default(uuid())
   name      String
-  email     String    @unique
-  password  String
-  role      Role      @default(CUSTOMER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  Cart      Cart?
-  Order     Order[]
-  Session   Session[]
-  Wishlist  Wishlist?
+  email     String
+  subject   String
+  message   String
+  status    SupportRequestStatus @default(NEW)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+}
+
+model User {
+  id            String          @id @default(uuid())
+  name          String
+  email         String          @unique
+  password      String
+  role          Role            @default(CUSTOMER)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Cart          Cart?
+  Order         Order[]
+  ProductReview ProductReview[]
+  Session       Session[]
+  Wishlist      Wishlist?
 }
 
 model Wishlist {
@@ -183,6 +237,7 @@ model WishlistItem {
 enum OrderStatus {
   PENDING
   CONFIRMED
+  INVENTORY_REVIEW
   PROCESSING
   SHIPPED
   DELIVERED
@@ -194,6 +249,23 @@ enum PaymentStatus {
   PAID
   FAILED
   REFUNDED
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum SupportRequestStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum EditorialType {
+  LOOKBOOK
+  JOURNAL
 }
 
 enum Role {

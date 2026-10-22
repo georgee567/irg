@@ -83,6 +83,7 @@ export interface OrderItem {
 export type OrderStatus =
   | "PENDING"
   | "CONFIRMED"
+  | "INVENTORY_REVIEW"
   | "PROCESSING"
   | "SHIPPED"
   | "DELIVERED"

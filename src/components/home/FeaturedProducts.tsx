@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -28,31 +27,12 @@ interface Product {
 
 export default function FeaturedProducts({
   content = defaultContent,
+  products,
 }: {
   content?: SiteContent;
+  products: Product[];
 }) {
   const { addToCart } = useCart();
-  const [products, setProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    async function loadProducts() {
-      try {
-        const response = await fetch("/api/products", {
-          cache: "no-store",
-        });
-
-        if (!response.ok) throw new Error("Unable to load products.");
-
-        const data = await response.json();
-
-        setProducts(data.products ?? []);
-      } catch (error) {
-        console.error("Load featured products error:", error);
-      }
-    }
-
-    loadProducts();
-  }, []);
 
   return (
     <section className="bg-[#050505] py-28">
@@ -89,15 +69,18 @@ export default function FeaturedProducts({
               >
                 <Link href={`/product/${product.id}`}>
                   <div className="relative h-[360px]">
-                    <Image
-                      src={
-                        product.images?.[0] ??
-                        "/images/products/jacket-01.jpg"
-                      }
-                      alt={product.name}
-                      fill
-                      className="object-cover transition duration-700 group-hover:scale-110"
-                    />
+                    {product.images?.[0] ? (
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-[#111] text-sm text-gray-500">
+                        Image coming soon
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-6">
@@ -132,6 +115,11 @@ export default function FeaturedProducts({
             );
           })}
         </div>
+        {products.length === 0 ? (
+          <p className="mt-8 text-center text-gray-400">
+            No featured products are available right now.
+          </p>
+        ) : null}
       </div>
     </section>
   );

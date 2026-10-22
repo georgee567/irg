@@ -1,10 +1,9 @@
-import crypto from "crypto";
 import { NextResponse } from "next/server";
 
-import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { initiateMpesaStkPush } from "@/lib/mpesa";
+import { expirePendingOrder, failPendingOrderPayment } from "@/lib/order-inventory";
 
 /**
  * POST /api/payments/mpesa
@@ -58,50 +57,106 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
+    if (order.status === "CANCELLED") {
+      return NextResponse.json(
+        { error: "Cancelled orders cannot be paid." },
+        { status: 409 }
+      );
+    }
 
-    // Initiate M-Pesa STK Push
-    const stkPush = await initiateMpesaStkPush(
-      phoneNumber,
-      order.total,
-      order.shippingName,
-      orderId
-    );
-
-    const providerResponse = {
-      merchantRequestId: stkPush.merchantRequestId,
-      checkoutRequestId: stkPush.checkoutRequestId,
-    } as Prisma.InputJsonValue;
     const existingPayment = await prisma.payment.findFirst({
-      where: { orderId, provider: "M-Pesa", status: "PENDING" },
+      where: {
+        orderId,
+        provider: "M-Pesa",
+        status: "PENDING",
+      },
       orderBy: { createdAt: "desc" },
     });
-    const payment = existingPayment
-      ? await prisma.payment.update({
-          where: { id: existingPayment.id },
-          data: { transactionReference: stkPush.checkoutRequestId, providerResponse },
-        })
-      : await prisma.payment.create({
-          data: {
-            id: crypto.randomUUID(),
-            updatedAt: new Date(),
-            orderId,
-            provider: "M-Pesa",
-            method: "mpesa",
-            amount: order.total,
-            currency: "KES",
-            status: "PENDING",
-            transactionReference: stkPush.checkoutRequestId,
-            providerResponse,
-          },
-        });
+
+    const expiresAt = new Date(Date.now() - 30 * 60 * 1000);
+    if (order.createdAt < expiresAt) {
+      if (existingPayment?.provider === "M-Pesa" && existingPayment.transactionReference) {
+        return NextResponse.json(
+          { error: "This payment is still being checked by the provider. Please refresh your order status." },
+          { status: 409 },
+        );
+      }
+      await prisma.$transaction((transaction) =>
+        expirePendingOrder(transaction, orderId, expiresAt),
+      );
+      return NextResponse.json(
+        { error: "This unpaid order expired. Please place a new order." },
+        { status: 409 },
+      );
+    }
+
+    if (existingPayment?.transactionReference) {
+      return NextResponse.json(
+        { error: "An M-Pesa payment is already awaiting confirmation for this order." },
+        { status: 409 },
+      );
+    }
+
+    const payment =
+      existingPayment ??
+      (await prisma.payment.create({
+        data: {
+          orderId,
+          provider: "M-Pesa",
+          method: "mpesa",
+          amount: order.total,
+          currency: "KES",
+          status: "PENDING",
+        },
+      }));
+
+    let stkPush: Awaited<ReturnType<typeof initiateMpesaStkPush>>;
+    try {
+      stkPush = await initiateMpesaStkPush(
+        phoneNumber,
+        order.total,
+        `IRG${orderId.slice(-9)}`,
+        orderId
+      );
+    } catch (error) {
+      await prisma.$transaction((transaction) =>
+        failPendingOrderPayment(transaction, orderId, payment.id, {
+          provider: "M-Pesa",
+          method: "mpesa",
+          status: "FAILED",
+        }),
+      );
+      throw error;
+    }
+
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: {
+        provider: "M-Pesa",
+        method: "mpesa",
+        transactionReference: stkPush.checkoutRequestId,
+        providerResponse: {
+          merchantRequestId: stkPush.merchantRequestId,
+          checkoutRequestId: stkPush.checkoutRequestId,
+        },
+      },
+    });
+
+    const cart = await prisma.cart.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+    if (cart) {
+      await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
+    }
 
     return NextResponse.json({
       success: true,
-      message: "STK Push sent. Please enter your M-Pesa PIN.",
+      message: "Sandbox STK Push sent. Use the Daraja test flow to complete it.",
       payment: {
         id: payment.id,
         status: payment.status,
-        transactionReference: payment.transactionReference,
+        transactionReference: stkPush.checkoutRequestId,
       },
       checkoutRequestId: stkPush.checkoutRequestId,
     });

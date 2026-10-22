@@ -47,6 +47,7 @@ export default async function Footer() {
             <Link href="/about" className="block hover:text-[#D4AF37]">{content.aboutLabel}</Link>
             <Link href="/journal" className="block hover:text-[#D4AF37]">{content.journalLabel}</Link>
             <Link href="/contact" className="block hover:text-[#D4AF37]">{content.contactLabel}</Link>
+            <Link href="/faq" className="block hover:text-[#D4AF37]">{content.faqLabel}</Link>
             <Link href="/privacy" className="block hover:text-[#D4AF37]">Privacy Policy</Link>
             <Link href="/terms" className="block hover:text-[#D4AF37]">Terms of Service</Link>
 

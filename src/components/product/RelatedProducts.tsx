@@ -20,9 +20,12 @@ export default function RelatedProducts({
   useEffect(() => {
     async function loadRelated() {
       try {
-        const response = await fetch("/api/products", {
+        const response = await fetch(
+          `/api/products?category=${encodeURIComponent(categoryId)}`,
+          {
           cache: "no-store",
-        });
+          },
+        );
 
         if (!response.ok) {
           throw new Error("Unable to load products.");
@@ -31,9 +34,7 @@ export default function RelatedProducts({
         const data = await response.json();
 
         const related = (data.products ?? []).filter(
-          (product: Product) =>
-            product.id !== productId &&
-            product.categoryId === categoryId
+          (product: Product) => product.id !== productId,
         );
 
         setProducts(related.slice(0, 4));
@@ -72,12 +73,18 @@ export default function RelatedProducts({
             className="overflow-hidden rounded-3xl border border-[#222]"
           >
             <div className="relative h-80">
-              <Image
-                src={product.images?.[0] ?? "/images/products/jacket-01.jpg"}
-                alt={product.name}
-                fill
-                className="object-cover transition duration-700 hover:scale-110"
-              />
+              {product.images?.[0] ? (
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition duration-700 hover:scale-110"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center bg-[#111] text-sm text-gray-500">
+                  Image coming soon
+                </div>
+              )}
             </div>
 
             <div className="p-6">

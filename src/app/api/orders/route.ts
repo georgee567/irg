@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { expireAbandonedPendingOrders } from "@/lib/order-inventory";
 
 type CheckoutBody = {
   shippingName?: string;
@@ -121,6 +122,11 @@ export async function POST(request: Request) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
+      await expireAbandonedPendingOrders(
+        tx,
+        new Date(Date.now() - 30 * 60 * 1000),
+      );
+
       const variantIds = cart.CartItem.map(
         (item) => item.variantId
       );
@@ -231,47 +237,6 @@ export async function POST(request: Request) {
           lineTotal: item.lineTotal,
           updatedAt: new Date(),
         })),
-      });
-
-      await tx.payment.create({
-        data: {
-          id: crypto.randomUUID(),
-          orderId: order.id,
-          provider: "PENDING",
-          method: "UNSELECTED",
-          amount: total,
-          currency: "KES",
-          status: "PENDING",
-          updatedAt: new Date(),
-        },
-      });
-
-      for (const cartItem of cart.CartItem) {
-        const updated = await tx.productVariant.updateMany({
-          where: {
-            id: cartItem.variantId,
-            stock: {
-              gte: cartItem.quantity,
-            },
-          },
-          data: {
-            stock: {
-              decrement: cartItem.quantity,
-            },
-          },
-        });
-
-        if (updated.count !== 1) {
-          throw new Error(
-            "Stock changed while creating the order. Please try again."
-          );
-        }
-      }
-
-      await tx.cartItem.deleteMany({
-        where: {
-          cartId: cart.id,
-        },
       });
 
       return tx.order.findUnique({

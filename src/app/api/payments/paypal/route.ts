@@ -9,6 +9,7 @@ import {
   capturePayPalOrder,
   getPayPalAmount,
 } from "@/lib/paypal";
+import { markPendingOrderPaid } from "@/lib/order-inventory";
 
 /**
  * POST /api/payments/paypal
@@ -58,9 +59,32 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
+    if (order.status === "CANCELLED" || order.paymentStatus !== "PENDING") {
+      return NextResponse.json(
+        { error: "This order is no longer payable." },
+        { status: 409 }
+      );
+    }
+    const pendingPayment = await prisma.payment.findFirst({
+      where: { orderId, status: "PENDING" },
+      select: { id: true },
+    });
+    if (pendingPayment) {
+      return NextResponse.json(
+        { error: "A payment is already pending for this order." },
+        { status: 409 }
+      );
+    }
 
     // Create PayPal order
     const paypalOrder = await createPayPalOrder(order.total, orderId);
+    const approvalLink = paypalOrder.links.find(
+      (link) => link.rel === "approve"
+    );
+
+    if (!approvalLink) {
+      throw new Error("No approval link found in PayPal response");
+    }
 
     // Store payment record
     await prisma.payment.create({
@@ -76,15 +100,6 @@ export async function POST(request: Request) {
         transactionReference: paypalOrder.id,
       },
     });
-
-    // Return approval link for frontend to redirect to
-    const approvalLink = paypalOrder.links.find(
-      (link) => link.rel === "approve"
-    );
-
-    if (!approvalLink) {
-      throw new Error("No approval link found in PayPal response");
-    }
 
     return NextResponse.json({
       paypalOrderId: paypalOrder.id,
@@ -125,7 +140,46 @@ export async function GET(request: Request) {
       );
     }
 
-    // Capture the PayPal order
+    const payment = await prisma.payment.findUnique({
+      where: { transactionReference: token },
+      include: {
+        Order: {
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            paymentStatus: true,
+            total: true,
+          },
+        },
+      },
+    });
+
+    if (!payment || payment.provider !== "PayPal" || payment.Order.userId !== user.id) {
+      return NextResponse.json(
+        { error: "PayPal payment not found." },
+        { status: 404 }
+      );
+    }
+    if (payment.status === "PAID") {
+      return NextResponse.json({
+        success: true,
+        message: "Payment was already completed.",
+        orderId: payment.orderId,
+        transactionId: token,
+      });
+    }
+    if (
+      payment.status !== "PENDING" ||
+      payment.Order.paymentStatus !== "PENDING" ||
+      payment.Order.status === "CANCELLED"
+    ) {
+      return NextResponse.json(
+        { error: "This PayPal payment is no longer payable." },
+        { status: 409 }
+      );
+    }
+
     const captureResult = await capturePayPalOrder(token);
 
     if (captureResult.status !== "COMPLETED") {
@@ -151,52 +205,36 @@ export async function GET(request: Request) {
       token;
 
     // Update order and payment in database
-    const order = await prisma.order.findUnique({
-      where: { id: referenceId },
-    });
-
-    if (!order || order.userId !== user.id) {
+    if (referenceId !== payment.orderId) {
       return NextResponse.json(
-        { error: "Order not found or unauthorized." },
-        { status: 404 }
+        { error: "PayPal order reference did not match the pending payment." },
+        { status: 400 }
       );
     }
 
     const capture = captureResult.purchase_units?.[0]?.payments?.captures?.[0];
-    if (!capture || capture.amount.currency_code !== "USD" || !new Prisma.Decimal(capture.amount.value).eq(getPayPalAmount(order.total))) {
+    if (!capture || capture.status !== "COMPLETED" || capture.amount.currency_code !== "USD" || !new Prisma.Decimal(capture.amount.value).eq(getPayPalAmount(payment.Order.total))) {
       return NextResponse.json({ error: "PayPal capture amount or currency did not match the order." }, { status: 400 });
     }
 
-    // Update payment status
-    const paymentUpdate = await prisma.payment.updateMany({
-      where: {
-        orderId: referenceId,
-        transactionReference: token,
-      },
-      data: {
+    const paymentUpdated = await prisma.$transaction((transaction) =>
+      markPendingOrderPaid(transaction, payment.orderId, payment.id, {
         status: "PAID",
-        transactionReference: transactionId,
         providerResponse: JSON.parse(JSON.stringify(captureResult)) as Prisma.InputJsonValue,
-      },
-    });
-    if (paymentUpdate.count !== 1) {
+      }),
+    );
+    if (!paymentUpdated) {
       return NextResponse.json({ error: "No pending PayPal payment found for this order." }, { status: 409 });
     }
 
-    // Update order payment status
-    await prisma.order.update({
-      where: { id: referenceId },
-      data: {
-        paymentStatus: "PAID",
-        status: "CONFIRMED",
-      },
-    });
-
     return NextResponse.json({
       success: true,
-      message: "Payment completed successfully.",
-      orderId: referenceId,
+      message: paymentUpdated === "INVENTORY_REVIEW"
+        ? "Payment completed. The order needs inventory review."
+        : "Payment completed successfully.",
+      orderId: payment.orderId,
       transactionId,
+      inventoryReviewRequired: paymentUpdated === "INVENTORY_REVIEW",
     });
   } catch (error) {
     console.error("Capture PayPal payment error:", error);

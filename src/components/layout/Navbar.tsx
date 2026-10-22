@@ -8,7 +8,6 @@ import {
   Search,
   Heart,
   ShoppingBag,
-  User,
   ChevronDown,
   Menu,
   X,
@@ -29,6 +28,7 @@ const links = [
   { key: "navLookbook", name: "Lookbook", href: "/lookbook" },
   { key: "navCustom", name: "Custom", href: "/custom" },
   { key: "navJournal", name: "Journal", href: "/journal" },
+  { key: "navFaq", name: "FAQ", href: "/faq" },
   { key: "navWishlist", name: "Wishlist", href: "/wishlist" },
   { key: "navContact", name: "Contact", href: "/contact" },
 ];
@@ -79,6 +79,13 @@ export default function Navbar({ content }: { content: SiteContent }) {
     (total, item) => total + item.quantity,
     0
   );
+  const initials = user?.name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("") || "U";
 
   return (
     <header className="relative sticky top-0 z-50 border-b border-[#191919] bg-black/95 backdrop-blur-xl">
@@ -153,11 +160,12 @@ export default function Navbar({ content }: { content: SiteContent }) {
             <div ref={dropdownRef} className="relative">
               <button
                 onClick={() => setAccountOpen(!accountOpen)}
+                aria-label={`${user.name} account`}
                 className="flex items-center gap-2 rounded-full border border-[#222] px-3 py-2 text-sm text-white transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
               >
-                <User size={16} />
-
-                <span className="max-w-[100px] truncate">{user.name}</span>
+                <span aria-hidden="true" className="flex h-7 w-7 items-center justify-center rounded-full bg-[#D4AF37] text-xs font-bold text-black">
+                  {initials}
+                </span>
 
                 <ChevronDown size={14} />
               </button>
@@ -199,10 +207,7 @@ export default function Navbar({ content }: { content: SiteContent }) {
 
         <button
           type="button"
-         onClick={() => {
-  console.log("HAMBURGER CLICKED");
-  setMenuOpen((previous) => !previous);
-}}
+          onClick={() => setMenuOpen((previous) => !previous)}
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           aria-controls="mobile-navigation"
@@ -230,6 +235,19 @@ export default function Navbar({ content }: { content: SiteContent }) {
             ))}
 
             <div className="mt-2 flex items-center gap-3 border-t border-[#151515] pt-4">
+              {user ? (
+                <Link
+                  href={user.role === "ADMIN" ? "/admin" : "/account"}
+                  onClick={handleMobileNavigation}
+                  aria-label={`${user.name} account`}
+                  className="flex items-center gap-2 text-sm text-white transition hover:text-[#D4AF37]"
+                >
+                  <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#D4AF37] text-xs font-bold text-black">
+                    {initials}
+                  </span>
+                  {user.role === "ADMIN" ? content.adminDashboardLabel : content.accountLabel}
+                </Link>
+              ) : null}
               {!user && (
                 <Link
                   href="/login"
