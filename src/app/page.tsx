@@ -11,7 +11,7 @@ import { connection } from "next/server";
 
 export default async function HomePage() {
   await connection();
-  const [content, productCount, customerCount, reviews, featuredProducts, categories] = await Promise.all([
+  const [content, productCount, customerCount, reviews, products, categories] = await Promise.all([
     getSiteContent("home"),
     prisma.product.count(),
     prisma.user.count({ where: { role: "CUSTOMER" } }),
@@ -27,7 +27,6 @@ export default async function HomePage() {
       },
     }),
     prisma.product.findMany({
-      take: 4,
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
       include: {
         Category: true,
@@ -49,7 +48,7 @@ export default async function HomePage() {
       <BrandStory content={content} />
       <FeaturedProducts
         content={content}
-        products={featuredProducts.map((product) => ({
+        products={products.map((product) => ({
           id: product.id,
           name: product.name,
           price: Number(product.price),
