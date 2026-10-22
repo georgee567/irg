@@ -27,8 +27,9 @@ export default async function HomePage() {
       },
     }),
     prisma.product.findMany({
+      where: { featured: true },
       take: 4,
-      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      orderBy: { createdAt: "desc" },
       include: {
         Category: true,
         ProductVariant: {
