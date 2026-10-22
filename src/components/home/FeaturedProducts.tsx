@@ -117,7 +117,7 @@ export default function FeaturedProducts({
         </div>
         {products.length === 0 ? (
           <p className="mt-8 text-center text-gray-400">
-            No featured products are available right now.
+            No products are available right now.
           </p>
         ) : null}
       </div>
