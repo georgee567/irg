@@ -27,8 +27,9 @@ export default async function HomePage() {
       },
     }),
     prisma.product.findMany({
+      where: { featured: true },
       take: 4,
-      orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
+      orderBy: { createdAt: "desc" },
       include: {
         Category: true,
         ProductVariant: {
@@ -42,6 +43,19 @@ export default async function HomePage() {
       orderBy: { name: "asc" },
     }),
   ]);
+  const homepageProducts =
+    featuredProducts.length > 0
+      ? featuredProducts
+      : await prisma.product.findMany({
+          take: 4,
+          orderBy: { createdAt: "desc" },
+          include: {
+            Category: true,
+            ProductVariant: {
+              select: { id: true, stock: true },
+            },
+          },
+        });
 
   return (
     <main className="overflow-x-hidden bg-black text-white">
@@ -49,7 +63,7 @@ export default async function HomePage() {
       <BrandStory content={content} />
       <FeaturedProducts
         content={content}
-        products={featuredProducts.map((product) => ({
+        products={homepageProducts.map((product) => ({
           id: product.id,
           name: product.name,
           price: Number(product.price),
